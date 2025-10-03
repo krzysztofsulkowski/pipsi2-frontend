@@ -13,12 +13,15 @@ System zarządzania domowym budżetem
 
 ## Podział ról w projekcie:
 programista backendu - Dawid Nowak, Anna Trybel
+
 programista frontendu - Wład Rogowski, Aneta Walczak
+
 tester - Krzysztof Sułkowski
 
 lider projektu - Krzysztof Sułkowski
 
 project manager - cały zespół
+
 inżynier devops - cały zespół
 
 ## Język programowania (backend):
