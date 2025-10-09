@@ -38,8 +38,17 @@ export default function LoginPage() {
         }
     };
 
+    const apiUrlForDisplay = process.env.NEXT_PUBLIC_API_URL;
+
     return (
         <main style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
+          
+            <div style={{ padding: '10px', backgroundColor: '#f0f0f0', border: '1px solid red', marginBottom: '20px' }}>
+                <p style={{ margin: 0, fontWeight: 'bold' }}>DEBUG: Adres API:</p>
+                <p style={{ margin: 0, color: 'blue', wordBreak: 'break-all' }}>
+                    {apiUrlForDisplay ? apiUrlForDisplay : "Zmienna jest UNDEFINED!"}
+                </p>
+            </div>
             <h1>Logowanie</h1>
             <form onSubmit={handleSubmit}>
                 <div style={{ marginBottom: '15px' }}>
