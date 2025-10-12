@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 
 export default function LoginPage() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export default function LoginPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ email, password }),
             });
 
             const data = await response.json();
@@ -52,12 +52,12 @@ export default function LoginPage() {
             <h1>Logowanie</h1>
             <form onSubmit={handleSubmit}>
                 <div style={{ marginBottom: '15px' }}>
-                    <label htmlFor="username" style={{ display: 'block', marginBottom: '5px' }}>Nazwa uzytkownika:</label>
+                    <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>Email:</label>
                     <input
                         type="text"
-                        id="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                         style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
                     />
