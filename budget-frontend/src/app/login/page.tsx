@@ -15,6 +15,11 @@ export default function LoginPage() {
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+        if (!apiUrl) {
+            setError("Brak konfiguracji API URL. Sprawdz zmienne srodowiskowe.");
+            return;
+        }
+
         try {
             const response = await fetch(`${apiUrl}/api/auth/login`, {
                 method: 'POST',
@@ -29,12 +34,20 @@ export default function LoginPage() {
             if (!response.ok) {
                 throw new Error(data.message || 'Logowanie nie powiodlo sie');
             }
+            
+            if (data.token) {
+                localStorage.setItem('authToken', data.token);
+                setSuccessMessage('Zalogowano pomyslnie! Token zostal zapisany.');
+            } else {
+                throw new Error("Brak tokenu w odpowiedzi serwera.");
+            }
 
-            localStorage.setItem('authToken', data.token);
-            setSuccessMessage('Zalogowano pomyslnie! Token zostal zapisany.');
-
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Wystapil nieznany blad');
+            }
         }
     };
 
