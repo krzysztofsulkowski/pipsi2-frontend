@@ -1,13 +1,24 @@
 'use client';
 
 import styles from "./Login.module.css";
+import logo from './logo.svg';
 import { useState, FormEvent } from 'react';
+import { useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+    const searchParams = useSearchParams();
+    const externalAuthError = searchParams.get('error');
+
+     useState(() => {
+        if (externalAuthError === 'auth_failed') {
+            setError('Logowanie za pomocą zewnętrznego dostawcy nie powiodło się.');
+        }
+    });
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
@@ -52,12 +63,25 @@ export default function LoginPage() {
         }
     };
 
+     const handleExternalLogin = (provider: 'Facebook' | 'Google') => {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        if (!apiUrl) {
+            setError("Brak konfiguracji API URL.");
+            return;
+        }
+
+        const returnUrl = `${window.location.origin}/auth/callback`;        
+        const externalLoginUrl = `${apiUrl}/api/authentication/external-login?provider=${provider}&returnUrl=${encodeURIComponent(returnUrl)}`;
+        window.location.href = externalLoginUrl;
+    };
+
     return (
         <main className={styles.page}>
             <div className={styles.container}>
                 <section className={styles.leftPanel}>
                     <div className={styles.logoWrapper}>
-                        <img src="/logo.svg" className={styles.logoImage}/>
+                        <img src={logo.src} alt="Logo aplikacji" className={styles.logoImage}/>
                         <div className={styles.logoSubtitle}>
                             Zachowaj równowagę w domowym budżecie
                         </div>
@@ -113,7 +137,7 @@ export default function LoginPage() {
                                 Zaloguj się przez Google
                             </button>
 
-                            <button type="button" className={`${styles.socialButton} ${styles.socialFacebook}`}>
+                            <button type="button" className={`${styles.socialButton} ${styles.socialFacebook}`} onClick={() => handleExternalLogin('Facebook')}>
                                 Zaloguj się przez Facebook
                             </button>
                         </form>
