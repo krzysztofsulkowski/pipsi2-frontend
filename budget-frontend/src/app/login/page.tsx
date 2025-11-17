@@ -3,7 +3,7 @@
 import styles from "./Login.module.css";
 import logo from './logo.svg';
 import { useState, FormEvent } from 'react';
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -11,6 +11,7 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+    const router = useRouter(); 
     const searchParams = useSearchParams();
     const externalAuthError = searchParams.get('error');
 
@@ -23,7 +24,6 @@ export default function LoginPage() {
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
         setError(null);
-        setSuccessMessage(null);
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
         }
 
         try {
-            const response = await fetch(`${apiUrl}/api/auth/login`, {
+            const response = await fetch(`${apiUrl}/api/authentication/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export default function LoginPage() {
 
             if (data.token) {
                 localStorage.setItem('authToken', data.token);
-                setSuccessMessage('Zalogowano pomyślnie! Token został zapisany.');
+                router.push('/dashboard'); 
             } else {
                 throw new Error("Brak tokenu w odpowiedzi serwera.");
             }
