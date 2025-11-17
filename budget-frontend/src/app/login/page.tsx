@@ -1,5 +1,6 @@
 'use client';
 
+import styles from "./Login.module.css";
 import { useState, FormEvent } from 'react';
 
 export default function LoginPage() {
@@ -16,7 +17,7 @@ export default function LoginPage() {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
         if (!apiUrl) {
-            setError("Brak konfiguracji API URL. Sprawdz zmienne srodowiskowe.");
+            setError("Brak konfiguracji API URL. Sprawdź zmienne środowiskowe.");
             return;
         }
 
@@ -32,12 +33,12 @@ export default function LoginPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Logowanie nie powiodlo sie');
+                throw new Error(data.message || 'Logowanie nie powiodło się');
             }
-            
+
             if (data.token) {
                 localStorage.setItem('authToken', data.token);
-                setSuccessMessage('Zalogowano pomyslnie! Token zostal zapisany.');
+                setSuccessMessage('Zalogowano pomyślnie! Token został zapisany.');
             } else {
                 throw new Error("Brak tokenu w odpowiedzi serwera.");
             }
@@ -46,51 +47,89 @@ export default function LoginPage() {
             if (err instanceof Error) {
                 setError(err.message);
             } else {
-                setError('Wystapil nieznany blad');
+                setError('Wystąpił nieznany błąd');
             }
         }
     };
 
-    const apiUrlForDisplay = process.env.NEXT_PUBLIC_API_URL;
-
     return (
-        <main style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-          
-            <div style={{ padding: '10px', backgroundColor: '#f0f0f0', border: '1px solid red', marginBottom: '20px' }}>
-                <p style={{ margin: 0, fontWeight: 'bold' }}>DEBUG: Adres API:</p>
-                <p style={{ margin: 0, color: 'blue', wordBreak: 'break-all' }}>
-                    {apiUrlForDisplay ? apiUrlForDisplay : "Zmienna jest UNDEFINED!"}
-                </p>
-            </div>
-            <h1>Logowanie</h1>
-            <form onSubmit={handleSubmit}>
-                <div style={{ marginBottom: '15px' }}>
-                    <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>Email:</label>
-                    <input
-                        type="text"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-                    />
-                </div>
-                <div style={{ marginBottom: '15px' }}>
-                    <label htmlFor="password" style={{ display: 'block', marginBottom: '5px' }}>Haslo:</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
-                    />
-                </div>
-                <button type="submit" style={{ padding: '10px 15px', width: '100%', cursor: 'pointer' }}>Zaloguj</button>
-            </form>
+        <main className={styles.page}>
+            <div className={styles.container}>
+                <section className={styles.leftPanel}>
+                    <div className={styles.logoWrapper}>
+                        <img src="/logo.svg" className={styles.logoImage}/>
+                        <div className={styles.logoSubtitle}>
+                            Zachowaj równowagę w domowym budżecie
+                        </div>
+                    </div>
+                </section>
 
-            {error && <p style={{ color: 'red', marginTop: '10px' }}>Blad: {error}</p>}
-            {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
+                <section className={styles.rightPanel}>
+                    <div className={styles.card}>
+                        <h1 className={styles.title}>Logowanie</h1>
+
+                        <form onSubmit={handleSubmit} className={styles.form}>
+                            <div className={styles.field}>
+                                <label htmlFor="email" className={styles.label}>e-mail</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className={styles.input}
+                                />
+                            </div>
+
+                            <div className={styles.field}>
+                                <label htmlFor="password" className={styles.label}>hasło</label>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className={styles.input}
+                                />
+                            </div>
+
+                            <div className={styles.forgotWrapper}>
+                                <a href="/reset-password" className={styles.linkMuted}>
+                                    Nie pamiętasz hasła?
+                                </a>
+                            </div>
+
+                            <button type="submit" className={styles.primaryButton}>
+                                Zaloguj się
+                            </button>
+
+                            <div className={styles.divider}>
+                                <span className={styles.dividerLine} />
+                                <span className={styles.dividerText}>lub</span>
+                                <span className={styles.dividerLine} />
+                            </div>
+
+                            <button type="button" className={`${styles.socialButton} ${styles.socialGoogle}`}>
+                                Zaloguj się przez Google
+                            </button>
+
+                            <button type="button" className={`${styles.socialButton} ${styles.socialFacebook}`}>
+                                Zaloguj się przez Facebook
+                            </button>
+                        </form>
+
+                        {error && <p className={styles.errorMessage}>Blad: {error}</p>}
+                        {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
+
+                        <p className={styles.bottomText}>
+                            Nie posiadasz konta?{' '}
+                            <a href="/register" className={styles.linkStrong}>
+                                Zarejestruj się
+                            </a>
+                        </p>
+                    </div>
+                </section>
+            </div>
         </main>
     );
 }
