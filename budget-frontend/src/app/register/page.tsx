@@ -5,6 +5,8 @@ import logo from './logo.svg';
 import { useState, FormEvent } from 'react';
 import { useRouter } from "next/navigation";
 
+const PASSWORD_MIN_LENGTH = 6;
+
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
@@ -13,7 +15,55 @@ export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [usernameError, setUsernameError] = useState<string | null>(null);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+
     const router = useRouter();
+
+    const validateForm = () => {
+        let hasError = false;
+        setEmailError(null);
+        setUsernameError(null);
+        setPasswordError(null);
+        setConfirmPasswordError(null);
+
+        if (!email) {
+            setEmailError("To pole jest wymagane.");
+            hasError = true;
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                setEmailError("Podaj prawidłowy adres e-mail.");
+                hasError = true;
+            }
+        }
+
+        if (!username) {
+            setUsernameError("To pole jest wymagane.");
+            hasError = true;
+        }
+
+        if (!password) {
+            setPasswordError("To pole jest wymagane.");
+            hasError = true;
+        } else if (password.length < PASSWORD_MIN_LENGTH) {
+            setPasswordError(`Hasło musi mieć co najmniej ${PASSWORD_MIN_LENGTH} znaków.`);
+            hasError = true;
+        }
+
+        if (!confirmPassword) {
+            setConfirmPasswordError("To pole jest wymagane.");
+            hasError = true;
+        } else if (password && confirmPassword && password !== confirmPassword) {
+            setConfirmPasswordError("Hasła nie są identyczne.");
+            hasError = true;
+        }
+
+        return !hasError;
+    };
+
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
@@ -27,10 +77,8 @@ export default function RegisterPage() {
             return;
         }
 
-        if (password !== confirmPassword) {
-            setError("Hasła nie są takie same.");
-            return;
-        }
+        const isValid = validateForm();
+        if (!isValid) return;
 
         try {
             const response = await fetch(`${apiUrl}/api/authentication/register`, {
@@ -50,16 +98,16 @@ export default function RegisterPage() {
             if (!response.ok) {
                 if (contentType.includes('application/json')) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Rejestracja nie powiodła się');
+                    mapBackendErrors(errorData);
                 } else {
-                    const errorText = await response.text();
-                    throw new Error(errorText || 'Rejestracja nie powiodła się');
+                    await response.text();
+                    setError("Wystąpił problem z rejestracją. Spróbuj ponownie za chwilę.");
                 }
+                return;
             }
 
-            let data: any = null;
             if (contentType.includes('application/json')) {
-                data = await response.json();
+                await response.json();
             }
 
             setSuccessMessage('Konto zostało utworzone. Możesz się teraz zalogować.');
@@ -76,6 +124,18 @@ export default function RegisterPage() {
         }
     };
 
+    const handleExternalLogin = (provider: 'Facebook' | 'Google') => {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        if (!apiUrl) {
+            setError("Brak konfiguracji API URL.");
+            return;
+        }
+
+        const returnUrl = `${window.location.origin}/auth/callback`;
+        const externalLoginUrl = `${apiUrl}/api/authentication/external-login?provider=${provider}&returnUrl=${encodeURIComponent(returnUrl)}`;
+        window.location.href = externalLoginUrl;
+    };
 
     return (
         <main className={styles.page}>
@@ -83,7 +143,6 @@ export default function RegisterPage() {
                 <section className={styles.leftPanel}>
                     <div className={styles.logoWrapper}>
                         <img src={logo.src} alt="Logo aplikacji" className={styles.logoImage} />
-
                         <div className={styles.logoSubtitle}>
                             Zachowaj równowagę w domowym budżecie
                         </div>
@@ -105,6 +164,7 @@ export default function RegisterPage() {
                                     required
                                     className={styles.input}
                                 />
+                                {emailError && <p className={styles.fieldError}>{emailError}</p>}
                             </div>
 
                             <div className={styles.field}>
@@ -117,6 +177,7 @@ export default function RegisterPage() {
                                     required
                                     className={styles.input}
                                 />
+                                {usernameError && <p className={styles.fieldError}>{usernameError}</p>}
                             </div>
 
                             <div className={styles.field}>
@@ -129,6 +190,7 @@ export default function RegisterPage() {
                                     required
                                     className={styles.input}
                                 />
+                                {passwordError && <p className={styles.fieldError}>{passwordError}</p>}
                             </div>
 
                             <div className={styles.field}>
@@ -141,10 +203,33 @@ export default function RegisterPage() {
                                     required
                                     className={styles.input}
                                 />
+                                {confirmPasswordError && <p className={styles.fieldError}>{confirmPasswordError}</p>}
                             </div>
 
                             <button type="submit" className={styles.primaryButton}>
                                 Zarejestruj się
+                            </button>
+
+                            <div className={styles.divider}>
+                                <span className={styles.dividerLine} />
+                                <span className={styles.dividerText}>lub</span>
+                                <span className={styles.dividerLine} />
+                            </div>
+
+                            <button
+                                type="button"
+                                className={`${styles.socialButton} ${styles.socialGoogle}`}
+                                onClick={() => handleExternalLogin('Google')}
+                            >
+                                Zarejestruj się przez Google
+                            </button>
+
+                            <button
+                                type="button"
+                                className={`${styles.socialButton} ${styles.socialFacebook}`}
+                                onClick={() => handleExternalLogin('Facebook')}
+                            >
+                                Zarejestruj się przez Facebook
                             </button>
                         </form>
 
@@ -159,6 +244,14 @@ export default function RegisterPage() {
                         </p>
                     </div>
                 </section>
+
+                <button
+                    type="button"
+                    className={styles.contactButton}
+                    onClick={() => router.push('/contact')}
+                >
+                    Skontaktuj się z nami
+                </button>
             </div>
         </main>
     );
