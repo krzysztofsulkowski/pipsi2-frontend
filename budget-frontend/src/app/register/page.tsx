@@ -244,14 +244,6 @@ export default function RegisterPage() {
                         </p>
                     </div>
                 </section>
-
-                <button
-                    type="button"
-                    className={styles.contactButton}
-                    onClick={() => router.push('/contact')}
-                >
-                    Skontaktuj się z nami
-                </button>
             </div>
         </main>
     );
