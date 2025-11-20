@@ -118,7 +118,7 @@ export default function LoginPage() {
                             </div>
 
                             <div className={styles.forgotWrapper}>
-                                <a href="/reset-password" className={styles.linkMuted}>
+                                <a href="/forgot-password" className={styles.linkMuted}>
                                     Nie pamiętasz hasła?
                                 </a>
                             </div>

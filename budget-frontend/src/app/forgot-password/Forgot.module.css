@@ -59,18 +59,12 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-}
-
-.label {
-    font-size: 13px;
-    color: #C9CCD6;
 }
 
 .input {
@@ -89,23 +83,14 @@
         border-width: 2px;
     }
 
-.forgotWrapper {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.linkMuted {
-    font-size: 11px;
+.helperText {
+    font-size: 12px;
     color: #C9CCD6;
-    text-decoration: underline;
+    text-align: center;
 }
-
-    .linkMuted:hover {
-        color: #ffffff;
-    }
 
 .primaryButton {
-    margin-top: 4px;
+    margin-top: 8px;
     width: 100%;
     padding: 12px 16px;
     border-radius: 52px;
@@ -123,74 +108,19 @@
         transform: translateY(-1px);
     }
 
-.divider {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 10px 0;
-}
-
-.dividerLine {
-    flex: 1;
-    height: 1px;
-    background: #3E4453;
-}
-
-.dividerText {
-    font-size: 11px;
-    color: #C9CCD6;
-}
-
-.socialButton {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 43px;
-    border: none;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 4px;
-    background: #1F2330;
-    color: #ffffff;
-    transition: background 0.15s ease, transform 0.05s ease;
-}
-
-    .socialButton:hover {
-        transform: translateY(-1px);
-        background: #232837;
-    }
-
 .errorMessage {
-    margin-top: 12px;
+    margin-top: 4px;
     font-size: 13px;
     color: #f97373;
+    text-align: center;
 }
 
 .successMessage {
-    margin-top: 12px;
+    margin-top: 4px;
     font-size: 13px;
     color: #4ade80;
-}
-
-.bottomText {
-    margin-top: 20px;
-    font-size: 12px;
     text-align: center;
-    color: #C9CCD6;
 }
-
-.linkStrong {
-    color: #EAC278;
-    font-weight: 600;
-}
-
-    .linkStrong:hover {
-        text-decoration: underline;
-    }
 
 @media (max-width: 960px) {
     .container {
@@ -203,6 +133,8 @@
 
     .rightPanel {
         padding: 40px 24px;
+        border-radius: 0;
+        box-shadow: none;
     }
 
     .card {
