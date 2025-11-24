@@ -1,11 +1,11 @@
 'use client';
 
+import { Suspense, useState, useEffect, FormEvent } from 'react';
 import styles from "./Login.module.css";
 import logo from './logo.svg';
-import { useState, FormEvent } from 'react';
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function LoginPage() {
+function LoginForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -15,11 +15,11 @@ export default function LoginPage() {
     const searchParams = useSearchParams();
     const externalAuthError = searchParams.get('error');
 
-     useState(() => {
+    useEffect(() => {
         if (externalAuthError === 'auth_failed') {
             setError('Logowanie za pomocą zewnętrznego dostawcy nie powiodło się.');
         }
-    });
+    }, [externalAuthError]);
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
@@ -154,6 +154,17 @@ export default function LoginPage() {
                     </div>
                 </section>
             </div>
+        </main>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <main className={styles.page}>
+            {}
+            <Suspense fallback={<div className={styles.container}>Ładowanie formularza...</div>}>
+                <LoginForm />
+            </Suspense>
         </main>
     );
 }
