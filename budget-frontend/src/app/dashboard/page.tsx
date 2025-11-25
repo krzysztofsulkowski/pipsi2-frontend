@@ -1,7 +1,6 @@
-import MetabaseReport from "./MetabaseReport"; 
-
 "use client";
 
+import MetabaseReport from "./MetabaseReport"; 
 import styles from "./Dashboard.module.css";
 
 const currencySymbol = "zł";
@@ -170,12 +169,6 @@ function DashboardPage() {
                             <p className={styles.statsSubtitle}>rok: {yearLabel}</p>
                         </div>
                         <div className={styles.statsBody}>
-                            <p className={styles.statsEmptyText}>
-                                Brak danych do wyświetlenia. Dodaj swoje pierwsze przychody i wydatki,
-                                aby zobaczyć statystyki i wykresy.
-                            </p>
-                        </div>
-                        <div className="rounded-lg overflow-hidden border border-gray-600">
                             <MetabaseReport dashboardId={MY_DASHBOARD_ID} />
                         </div>
                     </div>
