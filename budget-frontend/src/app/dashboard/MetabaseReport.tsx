@@ -31,21 +31,25 @@ export default function MetabaseReport({ dashboardId }: MetabaseReportProps) {
                         const parsed = JSON.parse(url);
                         if (parsed.data) url = parsed.data;
                         else if (parsed.result) url = parsed.result;
-                    } catch (e) {
+                    } catch {
                         console.error("Nie udało się sparsować odpowiedzi:", url);
                     }
                 }
                 setIframeUrl(url);
-            } catch (err: any) {
+            }catch (err: unknown) { 
                 console.error("Błąd fetch:", err);
-                setError(err.message);
+                 if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError('Wystąpił nieznany błąd');
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         fetchUrl();
-    }, [dashboardId]);
+    }, [dashboardId, apiUrl]);
 
     if (loading) return <div className="p-4 text-gray-500">Ładowanie wykresów...</div>;
     if (error) return <div className="p-4 text-red-500">Błąd: {error}</div>;
