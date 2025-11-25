@@ -5,6 +5,16 @@ import logo from './logo.svg';
 import { useState, FormEvent } from 'react';
 import { useRouter } from "next/navigation";
 
+interface BackendErrorResponse {
+    type?: string;
+    title?: string;
+    status?: number;
+    detail?: string;  
+    errors?: {
+        Model?: string[]; 
+    };
+}
+
 function validatePasswordPolicy(password: string): string | null {
     if (password.length < 8) {
         return "Hasło musi mieć co najmniej 8 znaków.";
@@ -39,40 +49,24 @@ export default function RegisterPage() {
 
     const router = useRouter();
 
-    const mapBackendErrors = (data: any) => {
-        if (!data) {
-            setError("Wystąpił nieznany błąd.");
-            return;
-        }
-        
-        if (data.errors) {
-            let hasFieldError = false;
-            if (data.errors.Email) { setEmailError(data.errors.Email.join(' ')); hasFieldError = true; }
-            if (data.errors.Username) { setUsernameError(data.errors.Username.join(' ')); hasFieldError = true; }
-            if (data.errors.Password) { setPasswordError(data.errors.Password.join(' ')); hasFieldError = true; }
-            if (data.errors.ConfirmPassword) { setConfirmPasswordError(data.errors.ConfirmPassword.join(' ')); hasFieldError = true; }
-
-            if (hasFieldError) {
-                setError(null);
-            } else {
-                setError("Formularz zawiera błędy walidacji. Sprawdź poprawność danych.");
-            }
-            return;
-        }
-
-        if (data.message) {
-            setError(data.message);
-            return;
-        }
-        
+    const mapBackendErrors = (data: BackendErrorResponse) => {
         if (data.detail) {
             setError(data.detail);
             return;
         }
 
-        setError("Rejestracja nie powiodła się.");
-    };
+        if (data.errors?.Model && data.errors.Model.length > 0) {
+            setError(data.errors.Model.join(', '));
+            return;
+        }
 
+        if (data.title) {
+            setError(data.title);
+            return;
+        }
+
+        setError("Wystąpił nieoczekiwany błąd serwera.");
+    };
 
     const validateForm = () => {
         let hasError = false;
