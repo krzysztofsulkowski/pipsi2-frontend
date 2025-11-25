@@ -1,5 +1,6 @@
 "use client";
 
+import MetabaseReport from "./MetabaseReport"; 
 import styles from "./Dashboard.module.css";
 
 const currencySymbol = "zł";
@@ -10,6 +11,7 @@ function DashboardPage() {
         year: "numeric",
     });
     const yearLabel = new Date().getFullYear();
+    const MY_DASHBOARD_ID = 2; 
 
     return (
         <div className={styles.page}>
@@ -167,10 +169,7 @@ function DashboardPage() {
                             <p className={styles.statsSubtitle}>rok: {yearLabel}</p>
                         </div>
                         <div className={styles.statsBody}>
-                            <p className={styles.statsEmptyText}>
-                                Brak danych do wyświetlenia. Dodaj swoje pierwsze przychody i wydatki,
-                                aby zobaczyć statystyki i wykresy.
-                            </p>
+                            <MetabaseReport dashboardId={MY_DASHBOARD_ID} />
                         </div>
                     </div>
 
