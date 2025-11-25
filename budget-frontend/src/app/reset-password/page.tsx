@@ -6,6 +6,25 @@ import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
+function validatePasswordPolicy(password: string): string | null {
+    if (password.length < 8) {
+        return "Hasło powinno mieć co najmniej 8 znaków.";
+    }
+    if (!/[a-z]/.test(password)) {
+        return "Hasło musi zawierać co najmniej jedną małą literę.";
+    }
+    if (!/[A-Z]/.test(password)) {
+        return "Hasło musi zawierać co najmniej jedną wielką literę.";
+    }
+    if (!/\d/.test(password)) {
+        return "Hasło musi zawierać co najmniej jedną cyfrę.";
+    }
+    if (!/[^a-zA-Z0-9]/.test(password)) {
+        return "Hasło musi zawierać co najmniej jeden znak specjalny.";
+    }
+    return null;
+}
+
 function ResetPasswordForm() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -39,8 +58,9 @@ function ResetPasswordForm() {
             return;
         }
 
-        if (password.length < 8) {
-            setError("Hasło powinno mieć co najmniej 8 znaków.");
+        const passwordPolicyError = validatePasswordPolicy(password);
+        if (passwordPolicyError) {
+            setError(passwordPolicyError);
             return;
         }
 

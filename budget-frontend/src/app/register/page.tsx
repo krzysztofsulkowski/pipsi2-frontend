@@ -5,7 +5,24 @@ import logo from './logo.svg';
 import { useState, FormEvent } from 'react';
 import { useRouter } from "next/navigation";
 
-const PASSWORD_MIN_LENGTH = 6;
+function validatePasswordPolicy(password: string): string | null {
+    if (password.length < 8) {
+        return "Hasło musi mieć co najmniej 8 znaków.";
+    }
+    if (!/[a-z]/.test(password)) {
+        return "Hasło musi zawierać co najmniej jedną małą literę.";
+    }
+    if (!/[A-Z]/.test(password)) {
+        return "Hasło musi zawierać co najmniej jedną wielką literę.";
+    }
+    if (!/\d/.test(password)) {
+        return "Hasło musi zawierać co najmniej jedną cyfrę.";
+    }
+    if (!/[^a-zA-Z0-9]/.test(password)) {
+        return "Hasło musi zawierać co najmniej jeden znak specjalny.";
+    }
+    return null;
+}
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
@@ -48,9 +65,12 @@ export default function RegisterPage() {
         if (!password) {
             setPasswordError("To pole jest wymagane.");
             hasError = true;
-        } else if (password.length < PASSWORD_MIN_LENGTH) {
-            setPasswordError(`Hasło musi mieć co najmniej ${PASSWORD_MIN_LENGTH} znaków.`);
-            hasError = true;
+        } else {
+            const passwordPolicyError = validatePasswordPolicy(password);
+            if (passwordPolicyError) {
+                setPasswordError(passwordPolicyError);
+                hasError = true;
+            }
         }
 
         if (!confirmPassword) {
@@ -237,7 +257,7 @@ export default function RegisterPage() {
                         {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
 
                         <p className={styles.bottomText}>
-                            Masz już konto?{' '}
+                            Masz już konto{' '}
                             <a href="/login" className={styles.linkStrong}>
                                 Zaloguj się
                             </a>
