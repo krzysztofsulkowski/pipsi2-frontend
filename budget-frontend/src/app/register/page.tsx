@@ -39,6 +39,41 @@ export default function RegisterPage() {
 
     const router = useRouter();
 
+    const mapBackendErrors = (data: any) => {
+        if (!data) {
+            setError("Wystąpił nieznany błąd.");
+            return;
+        }
+        
+        if (data.errors) {
+            let hasFieldError = false;
+            if (data.errors.Email) { setEmailError(data.errors.Email.join(' ')); hasFieldError = true; }
+            if (data.errors.Username) { setUsernameError(data.errors.Username.join(' ')); hasFieldError = true; }
+            if (data.errors.Password) { setPasswordError(data.errors.Password.join(' ')); hasFieldError = true; }
+            if (data.errors.ConfirmPassword) { setConfirmPasswordError(data.errors.ConfirmPassword.join(' ')); hasFieldError = true; }
+
+            if (hasFieldError) {
+                setError(null);
+            } else {
+                setError("Formularz zawiera błędy walidacji. Sprawdź poprawność danych.");
+            }
+            return;
+        }
+
+        if (data.message) {
+            setError(data.message);
+            return;
+        }
+        
+        if (data.detail) {
+            setError(data.detail);
+            return;
+        }
+
+        setError("Rejestracja nie powiodła się.");
+    };
+
+
     const validateForm = () => {
         let hasError = false;
         setEmailError(null);
