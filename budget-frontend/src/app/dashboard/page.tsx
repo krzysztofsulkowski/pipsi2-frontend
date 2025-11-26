@@ -1,6 +1,6 @@
 "use client";
 
-import MetabaseReport from "./MetabaseReport"; 
+import BudgetReport from "./BudgetReport"; 
 import styles from "./Dashboard.module.css";
 
 const currencySymbol = "zł";
@@ -11,7 +11,13 @@ function DashboardPage() {
         year: "numeric",
     });
     const yearLabel = new Date().getFullYear();
-    const MY_DASHBOARD_ID = 2; 
+
+    const REPORT_LINKS = {
+        teamExpenses: "https://lookerstudio.google.com/embed/reporting/XXX/page/1",
+        memberExpenses: "https://lookerstudio.google.com/embed/reporting/XXX/page/2",
+        yearlyCategories: "https://lookerstudio.google.com/embed/reporting/XXX/page/3",
+        yearlyMembers: "https://lookerstudio.google.com/embed/reporting/XXX/page/4"
+    };
 
     return (
         <div className={styles.page}>
@@ -139,10 +145,7 @@ function DashboardPage() {
                             <p className={styles.statsSubtitle}>miesiąc: {monthLabel}</p>
                         </div>
                         <div className={styles.statsBody}>
-                            <p className={styles.statsEmptyText}>
-                                Brak danych do wyświetlenia. Dodaj swoje pierwsze przychody i wydatki,
-                                aby zobaczyć statystyki i wykresy.
-                            </p>
+                            <BudgetReport reportUrl={REPORT_LINKS.teamExpenses} />
                         </div>
                     </div>
 
@@ -153,11 +156,8 @@ function DashboardPage() {
                             </p>
                             <p className={styles.statsSubtitle}>miesiąc: {monthLabel}</p>
                         </div>
-                        <div className={styles.statsBody}>
-                            <p className={styles.statsEmptyText}>
-                                Brak danych do wyświetlenia. Dodaj swoje pierwsze przychody i wydatki,
-                                aby zobaczyć statystyki i wykresy.
-                            </p>
+                       <div className={styles.statsBody}>
+                            <BudgetReport reportUrl={REPORT_LINKS.memberExpenses} />
                         </div>
                     </div>
 
@@ -168,8 +168,8 @@ function DashboardPage() {
                             </p>
                             <p className={styles.statsSubtitle}>rok: {yearLabel}</p>
                         </div>
-                        <div className={styles.statsBody}>
-                            <MetabaseReport dashboardId={MY_DASHBOARD_ID} />
+                         <div className={styles.statsBody}>
+                            <BudgetReport reportUrl={REPORT_LINKS.yearlyCategories} />
                         </div>
                     </div>
 
@@ -180,11 +180,8 @@ function DashboardPage() {
                             </p>
                             <p className={styles.statsSubtitle}>rok: {yearLabel}</p>
                         </div>
-                        <div className={styles.statsBody}>
-                            <p className={styles.statsEmptyText}>
-                                Brak danych do wyświetlenia. Dodaj swoje pierwsze przychody i wydatki,
-                                aby zobaczyć statystyki i wykresy.
-                            </p>
+                         <div className={styles.statsBody}>
+                            <BudgetReport reportUrl={REPORT_LINKS.yearlyMembers} />
                         </div>
                     </div>
                 </section>
