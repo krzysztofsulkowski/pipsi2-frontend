@@ -72,7 +72,7 @@ export default function CategoryChart({ data }: { data: Transaction[] }) {
                             borderRadius: '8px'
                         }}
                         itemStyle={{ color: '#E5E7EB' }}
-                        formatter={(value: any) => [`${value.toLocaleString()} zł`, 'Kwota']}
+                        formatter={(value: number | string) => [`${value.toLocaleString()} zł`, 'Kwota']}
                     />
                     
                     <Legend 
