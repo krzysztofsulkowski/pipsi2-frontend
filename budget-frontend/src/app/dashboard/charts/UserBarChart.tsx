@@ -2,11 +2,16 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-export default function UserBarChart({ data }: { data: any[] }) {
+interface Transaction {
+    userName?: string;
+    amount?: number | string;
+}
+
+export default function UserBarChart({ data }: { data: Transaction[] }) {
     
     const safeData = Array.isArray(data) ? data : [];
 
-    const groupedData = safeData.reduce((acc: any, curr: any) => {
+    const groupedData = safeData.reduce((acc: Record<string, number>, curr: Transaction) => {
         const user = curr.userName || 'Nieznany'; 
         const amount = Number(curr.amount) || 0;
         

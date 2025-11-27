@@ -6,6 +6,13 @@ import CategoryChart from "./charts/CategoryChart";
 import UserBarChart from "./charts/UserBarChart";
 
 const currencySymbol = "zł";
+export interface Transaction {
+    category?: string;
+    Category?: string; 
+    amount?: number | string;
+    Amount?: number | string;
+    userName?: string;
+}
 
 function DashboardPage() {
     const currentYear = new Date().getFullYear();
@@ -14,34 +21,34 @@ function DashboardPage() {
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
-    const [rawData, setRawData] = useState<any[]>([]);
+    const [rawData, setRawData] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
     
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''; 
-           
-            const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}`;
-            
-            console.log("Pobieram dane z:", url); 
-
-            const res = await fetch(url);
-            const data = await res.json();
-            
-            if (Array.isArray(data)) {
-                setRawData(data);
-            } else {
-                setRawData([]); 
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''; 
+               
+                const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}`;
+                
+                console.log("Pobieram dane z:", url); 
+    
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (Array.isArray(data)) {
+                    setRawData(data);
+                } else {
+                    setRawData([]); 
+                }
+            } catch (e) {
+                console.error("Błąd pobierania danych", e);
+            } finally {
+                setLoading(false);
             }
-        } catch (e) {
-            console.error("Błąd pobierania danych", e);
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
 
-   useEffect(() => {
         fetchData();
     }, [selectedYear, selectedMonth]); 
 

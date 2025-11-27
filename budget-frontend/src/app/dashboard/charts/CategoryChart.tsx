@@ -2,6 +2,13 @@
 
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+interface Transaction {
+    category?: string;
+    Category?: string;
+    amount?: number | string;
+    Amount?: number | string;
+}
+
 const COLORS = [
     '#6A7192', 
     '#969CBD', 
@@ -10,11 +17,11 @@ const COLORS = [
     '#C9CBD6'
 ];
 
-export default function CategoryChart({ data }: { data: any[] }) {
+export default function CategoryChart({ data }: { data: Transaction[] }) {
     
     const safeData = Array.isArray(data) ? data : [];
 
-    const groupedData = safeData.reduce((acc: any, curr: any) => {
+    const groupedData = safeData.reduce((acc: Record<string, number>, curr: Transaction) => {
         const cat = curr.category || curr.Category || 'Inne';
         const amount = Number(curr.amount || curr.Amount) || 0;
         
