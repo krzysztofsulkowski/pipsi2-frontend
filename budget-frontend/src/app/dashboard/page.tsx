@@ -70,7 +70,6 @@ function DashboardPage() {
 
             <main className={styles.main}>
                 <section className={styles.greeting}>
-                    {/* --- 2. DODANO: Flexbox, żeby umieścić filtry obok powitania --- */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '20px' }}>
                         <div>
                             <h1 className={styles.greetingTitle}>
@@ -85,7 +84,6 @@ function DashboardPage() {
                             </p>
                         </div>
 
-                        {/* --- 3. DODANO: Dropdowny do zmiany daty --- */}
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <select 
                                 value={selectedYear}
@@ -118,7 +116,6 @@ function DashboardPage() {
                             </select>
                         </div>
                     </div>
-                    {/* --- Koniec sekcji filtrów --- */}
 
                     <div className={styles.greetingUnderline} />
                 </section>
@@ -130,7 +127,6 @@ function DashboardPage() {
                                 <p className={styles.cardTitle}>Twój aktualny bilans</p>
                             </div>
                             <div className={styles.cardValue}>
-                                {/* Możemy tu wstawić sumę z wykresów, jeśli chcesz: */}
                                 <span className={styles.cardValueNumber}>--,--</span> 
                                 <span className={styles.cardValueCurrency}>{currencySymbol}</span>
                             </div>
@@ -172,7 +168,6 @@ function DashboardPage() {
                                 <p className={styles.cardTitle}>Wydatki</p>
                             </div>
                             <div className={styles.cardValue}>
-                                {/* Tu możemy pokazać obliczoną sumę: */}
                                 <span className={styles.cardValueNumber}>{totalExpenses.toFixed(2)}</span>
                                 <span className={styles.cardValueCurrency}>{currencySymbol}</span>
                             </div>
