@@ -13,10 +13,10 @@ function DashboardPage() {
     const yearLabel = new Date().getFullYear();
 
     const REPORT_LINKS = {
-        teamExpenses: "https://lookerstudio.google.com/embed/reporting/XXX/page/1",
-        memberExpenses: "https://lookerstudio.google.com/embed/reporting/XXX/page/2",
-        yearlyCategories: "https://lookerstudio.google.com/embed/reporting/XXX/page/3",
-        yearlyMembers: "https://lookerstudio.google.com/embed/reporting/XXX/page/4"
+        teamExpenses: process.env.NEXT_PUBLIC_REPORT_TEAM_EXPENSES || "",
+        memberExpenses: process.env.NEXT_PUBLIC_REPORT_MEMBER_EXPENSES || "",
+        yearlyCategories: process.env.NEXT_PUBLIC_REPORT_YEARLY_CATEGORIES || "",
+        yearlyMembers: process.env.NEXT_PUBLIC_REPORT_YEARLY_MEMBERS || ""
     };
 
     return (

@@ -5,15 +5,17 @@ import { JWT } from 'google-auth-library';
 
 export async function POST() {
   try {
-    console.log("🚀 [API] Rozpoczynam pobieranie danych z tabelą łączącą...");
+    console.log("🚀 [API] Synchronizacja danych...");
+
+    const isLocal = process.env.DB_HOST === 'localhost' || process.env.DB_HOST === '127.0.0.1';
 
     const pool = new Pool({
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
-      port: parseInt(process.env.DB_PORT || '5432'),
-      ssl: { rejectUnauthorized: false },
+      port: parseInt(process.env.DB_PORT || '5432'),      
+      ssl: isLocal ? false : { rejectUnauthorized: false },
     });
 
     const client = await pool.connect();
