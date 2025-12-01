@@ -2,7 +2,6 @@
 
 import { Suspense, useState, useEffect, FormEvent } from 'react';
 import styles from "./Login.module.css";
-import logo from './logo.svg';
 import { useSearchParams, useRouter } from "next/navigation";
 
 function LoginForm() {
@@ -81,7 +80,7 @@ function LoginForm() {
             <div className={styles.container}>
                 <section className={styles.leftPanel}>
                     <div className={styles.logoWrapper}>
-                        <img src={logo.src} alt="Logo aplikacji" className={styles.logoImage}/>
+                        <img src="/logo.svg" alt="Logo aplikacji" className={styles.logoImage}/>
                         <div className={styles.logoSubtitle}>
                             Zachowaj równowagę w domowym budżecie
                         </div>

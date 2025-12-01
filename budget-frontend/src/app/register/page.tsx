@@ -1,7 +1,6 @@
 'use client';
 
 import styles from "./Register.module.css";
-import logo from './logo.svg';
 import { useState, FormEvent } from 'react';
 import { useRouter } from "next/navigation";
 
@@ -191,7 +190,7 @@ export default function RegisterPage() {
             <div className={styles.container}>
                 <section className={styles.leftPanel}>
                     <div className={styles.logoWrapper}>
-                        <img src={logo.src} alt="Logo aplikacji" className={styles.logoImage} />
+                        <img src="/logo.svg" alt="Logo aplikacji" className={styles.logoImage} />
                         <div className={styles.logoSubtitle}>
                             Zachowaj równowagę w domowym budżecie
                         </div>
