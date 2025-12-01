@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import styles from "./Forgot.module.css";
-import logo from './logo.svg';
 import { useState, FormEvent } from "react";
 
 export default function ForgotPasswordPage() {
@@ -66,7 +65,7 @@ export default function ForgotPasswordPage() {
                 <section className={styles.leftPanel}>
                     <div className={styles.logoWrapper}>
                         <img
-                            src={logo.src}
+                            src="/logo.svg"
                             alt="Logo aplikacji"
                             className={styles.logoImage}
                         />
