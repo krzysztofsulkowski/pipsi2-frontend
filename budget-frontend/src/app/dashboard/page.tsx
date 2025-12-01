@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import styles from "./Dashboard.module.css";
 import CategoryChart from "./charts/CategoryChart";
 import UserBarChart from "./charts/UserBarChart";
+import Link from "next/link"; 
 
 const currencySymbol = "zł";
 export interface Transaction {
@@ -31,9 +32,7 @@ function DashboardPage() {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''; 
                
                 const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}`;
-                
-                console.log("Pobieram dane z:", url); 
-    
+                    
                 const res = await fetch(url);
                 const data = await res.json();
                 
@@ -68,9 +67,17 @@ function DashboardPage() {
                 </div>
 
                 <nav className={styles.nav}>
-                    <button className={styles.navLink}>Porady finansowe</button>
-                    <button className={styles.navLink}>FAQ</button>
-                    <button className={styles.navLink}>O nas</button>
+                    <Link href="/tips" className={styles.navLink}>
+                        Porady finansowe
+                    </Link>
+
+                    <Link href="/FAQ" className={styles.navLink}>
+                        FAQ
+                    </Link>
+
+                    <Link href="/about-us" className={styles.navLink}>
+                        O nas
+                    </Link>
                 </nav>
             </header>
 
@@ -194,6 +201,19 @@ function DashboardPage() {
                                 <p className={styles.historyEmptyText}>
                                     Dodaj swoje pierwsze przychody i wydatki, aby zobaczyć historię transakcji.
                                 </p>
+                                <Link href="/transactions" className={styles.historyButton}>
+                                    <div className={styles.historyIcon}>
+                                        <img 
+                                            src="/history-icon.svg" 
+                                            alt="Ikona historii" 
+                                            width={51} 
+                                            height={51} 
+                                        />
+                                    </div>
+                                    <span className={styles.historyButtonText}>
+                                        ZOBACZ PEŁNĄ HISTORIĘ
+                                    </span>
+                                </Link>
                             </div>
                         </div>
 
