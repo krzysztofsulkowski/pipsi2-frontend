@@ -1,23 +1,58 @@
 "use client";
 
-import BudgetReport from "./BudgetReport"; 
+import { useEffect, useState } from "react";
 import styles from "./Dashboard.module.css";
+import CategoryChart from "./charts/CategoryChart";
+import UserBarChart from "./charts/UserBarChart";
 
 const currencySymbol = "zł";
+export interface Transaction {
+    category?: string;
+    Category?: string; 
+    amount?: number | string;
+    Amount?: number | string;
+    userName?: string;
+}
 
 function DashboardPage() {
-    const monthLabel = new Date().toLocaleDateString("pl-PL", {
-        month: "long",
-        year: "numeric",
-    });
-    const yearLabel = new Date().getFullYear();
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
-    const REPORT_LINKS = {
-        teamExpenses: process.env.NEXT_PUBLIC_REPORT_TEAM_EXPENSES || "",
-        memberExpenses: process.env.NEXT_PUBLIC_REPORT_MEMBER_EXPENSES || "",
-        yearlyCategories: process.env.NEXT_PUBLIC_REPORT_YEARLY_CATEGORIES || "",
-        yearlyMembers: process.env.NEXT_PUBLIC_REPORT_YEARLY_MEMBERS || ""
-    };
+    const [rawData, setRawData] = useState<Transaction[]>([]);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''; 
+               
+                const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}`;
+                
+                console.log("Pobieram dane z:", url); 
+    
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (Array.isArray(data)) {
+                    setRawData(data);
+                } else {
+                    setRawData([]); 
+                }
+            } catch (e) {
+                console.error("Błąd pobierania danych", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [selectedYear, selectedMonth]); 
+
+    const totalExpenses = rawData.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
 
     return (
         <div className={styles.page}>
@@ -42,13 +77,53 @@ function DashboardPage() {
 
             <main className={styles.main}>
                 <section className={styles.greeting}>
-                    <h1 className={styles.greetingTitle}>
-                        Cześć, <span className={styles.greetingHighlight}>[imię użytkownika]</span>!
-                    </h1>
-                    <p className={styles.greetingSubtitle}>
-                        Twoja finansowa{" "}
-                        <span className={styles.greetingHighlight}>równowaga</span> zaczyna się tutaj.
-                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '20px' }}>
+                        <div>
+                            <h1 className={styles.greetingTitle}>
+                                Cześć, <span className={styles.greetingHighlight}>[imię użytkownika]</span>!
+                            </h1>
+                            <p className={styles.greetingSubtitle}>
+                                Twoja finansowa <span className={styles.greetingHighlight}>równowaga</span> zaczyna się tutaj.
+                                <br/>
+                                <span style={{ fontSize: '0.9em', opacity: 0.8, fontWeight: 'normal' }}>
+                                    Wybrany okres: {selectedMonth === 0 ? "Cały Rok" : selectedMonth} / {selectedYear}
+                                </span>
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <select 
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                style={{ padding: '8px', borderRadius: '6px', background: '#374151', color: 'white', border: '1px solid #4B5563' }}
+                            >
+                                <option value={2024}>2024</option>
+                                <option value={2025}>2025</option>
+                                <option value={2026}>2026</option>
+                            </select>
+
+                            <select 
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                                style={{ padding: '8px', borderRadius: '6px', background: '#374151', color: 'white', border: '1px solid #4B5563' }}
+                            >
+                                <option value={0}>Cały rok</option>
+                                <option value={1}>Styczeń</option>
+                                <option value={2}>Luty</option>
+                                <option value={3}>Marzec</option>
+                                <option value={4}>Kwiecień</option>
+                                <option value={5}>Maj</option>
+                                <option value={6}>Czerwiec</option>
+                                <option value={7}>Lipiec</option>
+                                <option value={8}>Sierpień</option>
+                                <option value={9}>Wrzesień</option>
+                                <option value={10}>Październik</option>
+                                <option value={11}>Listopad</option>
+                                <option value={12}>Grudzień</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div className={styles.greetingUnderline} />
                 </section>
 
@@ -59,7 +134,7 @@ function DashboardPage() {
                                 <p className={styles.cardTitle}>Twój aktualny bilans</p>
                             </div>
                             <div className={styles.cardValue}>
-                                <span className={styles.cardValueNumber}>--,--</span>
+                                <span className={styles.cardValueNumber}>--,--</span> 
                                 <span className={styles.cardValueCurrency}>{currencySymbol}</span>
                             </div>
                             <p className={styles.cardDescription}>
@@ -100,7 +175,7 @@ function DashboardPage() {
                                 <p className={styles.cardTitle}>Wydatki</p>
                             </div>
                             <div className={styles.cardValue}>
-                                <span className={styles.cardValueNumber}>--,--</span>
+                                <span className={styles.cardValueNumber}>{totalExpenses.toFixed(2)}</span>
                                 <span className={styles.cardValueCurrency}>{currencySymbol}</span>
                             </div>
                             <div className={styles.cardActions}>
@@ -136,56 +211,22 @@ function DashboardPage() {
                     </aside>
                 </section>
 
-                <section className={styles.statsGrid}>
+               <section className={styles.statsGrid}>
                     <div className={styles.statsCard}>
-                        <div className={styles.statsHeader}>
-                            <p className={styles.statsTitle}>
-                                wydatki zespołu z podziałem na kategorie
-                            </p>
-                            <p className={styles.statsSubtitle}>miesiąc: {monthLabel}</p>
-                        </div>
+                        <div className={styles.statsHeader}><h3>Wydatki wg Kategorii</h3></div>
                         <div className={styles.statsBody}>
-                            <BudgetReport reportUrl={REPORT_LINKS.teamExpenses} />
+                            {loading ? <p style={{color: '#aaa', textAlign: 'center'}}>Ładowanie danych...</p> : <CategoryChart data={rawData} />}
                         </div>
                     </div>
 
                     <div className={styles.statsCard}>
-                        <div className={styles.statsHeader}>
-                            <p className={styles.statsTitle}>
-                                wydatki z podziałem na członków budżetu
-                            </p>
-                            <p className={styles.statsSubtitle}>miesiąc: {monthLabel}</p>
-                        </div>
-                       <div className={styles.statsBody}>
-                            <BudgetReport reportUrl={REPORT_LINKS.memberExpenses} />
-                        </div>
-                    </div>
-
-                    <div className={styles.statsCard}>
-                        <div className={styles.statsHeader}>
-                            <p className={styles.statsTitle}>
-                                wydatki zespołu z podziałem na kategorie
-                            </p>
-                            <p className={styles.statsSubtitle}>rok: {yearLabel}</p>
-                        </div>
-                         <div className={styles.statsBody}>
-                            <BudgetReport reportUrl={REPORT_LINKS.yearlyCategories} />
-                        </div>
-                    </div>
-
-                    <div className={styles.statsCard}>
-                        <div className={styles.statsHeader}>
-                            <p className={styles.statsTitle}>
-                                wydatki z podziałem na członków budżetu
-                            </p>
-                            <p className={styles.statsSubtitle}>rok: {yearLabel}</p>
-                        </div>
-                         <div className={styles.statsBody}>
-                            <BudgetReport reportUrl={REPORT_LINKS.yearlyMembers} />
+                        <div className={styles.statsHeader}><h3>Wydatki wg Członków</h3></div>
+                        <div className={styles.statsBody}>
+                            {loading ? <p style={{color: '#aaa', textAlign: 'center'}}>Ładowanie danych...</p> : <UserBarChart data={rawData} />}
                         </div>
                     </div>
                 </section>
-
+                
                 <section className={styles.footerCta}>
                     <p className={styles.footerText}>
                         Potrzebujesz inspiracji, jak zachować finansową równowagę? Odkryj praktyczne
