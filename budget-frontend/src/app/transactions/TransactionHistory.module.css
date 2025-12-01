@@ -1,0 +1,247 @@
+.pageContainer {
+  background: #272C3C;
+  min-height: 100vh;
+  padding: 40px;
+ 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+ 
+  font-family: 'Afacad', sans-serif;
+  color: #FFF;
+}
+
+
+
+
+.headerTitle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 563px;
+  height: 135px;
+  font-size: 48px;
+  font-weight: 500;
+  line-height: normal;
+  color: #FFF;
+}
+
+
+.divider {
+  width: 689px;
+  height: 1px;
+  background: #FFF;
+  margin-bottom: 20px;
+}
+
+
+.breadcrumbsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 689px;
+  height: 32px;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 50px;
+}
+
+
+.crumbLink {
+  color: #FFF;
+  text-decoration: none;
+}
+
+
+.crumbActive {
+  color: #EAC278;
+}
+
+
+
+
+.statsRow {
+  display: flex;
+  flex-wrap: wrap;
+ 
+  align-self: center;
+  justify-content: center;
+ 
+  gap: 24px;
+  margin-bottom: 50px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+
+.statCard {
+  border-radius: 10.823px;
+  border: 1.082px solid #FFF;
+  background: #1F2330;
+  box-shadow: 0px 2.886px 2.886px 0px rgba(0, 0, 0, 0.25);
+ 
+  padding: 20px;
+ 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 250px;
+  min-height: 150px;
+}
+
+
+.cardTitle {
+  color: #EAC278;
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+
+.cardValueWrapper {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+
+
+.cardValue {
+  color: #FFF;
+  font-size: 37.11px;
+  font-weight: 700;
+}
+
+
+.cardCurrency {
+  color: #EAC278;
+  font-size: 37.11px;
+  font-weight: 700;
+}
+
+
+.cardDescription {
+  width: 222.23px;
+  color: #52586B;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: normal;
+  margin-top: 5px;
+}
+
+
+
+
+.dateNavRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 40px;  
+  align-self: center;
+}
+
+
+.navBox {
+  background: #1F2330;
+  border-radius: 8.287px;
+  height: 61.046px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.navButton {
+  width: 61.046px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+
+.navButton:hover {
+  opacity: 0.8;
+}
+
+
+.dateLabel {
+  width: 275.836px;
+  color: #FFF;
+  text-align: center;
+  font-size: 24.117px;
+  font-weight: 700;
+}
+
+
+.iconSvg {
+  width: 14px;
+  height: 24px;
+}
+
+
+
+
+.tableWrapper {
+  align-self: center;
+ 
+  width: 100%;
+  max-width: 1100px;
+  overflow-x: auto;
+ 
+  background: #1F2330;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+
+.transactionTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+
+.transactionTable thead tr th {
+  text-align: left;
+  padding: 18px;
+  border-bottom: 1px solid #444;
+  color: #EAC278;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+
+.transactionTable tbody tr td {
+  padding: 18px;
+  border-bottom: 1px solid #3E4558;
+  color: #FFF;
+  font-size: 15px;
+}
+
+
+.transactionTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+.optionButton {
+  background: transparent;
+  border: 1px solid #8D94A8;
+  color: #FFF;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.3s;
+}
+
+
+.optionButton:hover {
+  border-color: #EAC278;
+  color: #EAC278;
+}
