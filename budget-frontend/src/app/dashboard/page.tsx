@@ -24,6 +24,11 @@ interface Budget {
     [key: string]: string | number | undefined | unknown; 
 }
 
+interface UserResponse {
+    userName: string;
+    email?: string;
+}
+
 type ApiResponse = Budget[] | { data: Budget[] };
 
 function DashboardPage() {
@@ -32,6 +37,8 @@ function DashboardPage() {
 
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+
+    const [userName, setUserName] = useState<string>("Użytkowniku");
 
     const [rawData, setRawData] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
@@ -44,85 +51,93 @@ function DashboardPage() {
     const [createError, setCreateError] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const token = localStorage.getItem("authToken"); 
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-                const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}`;
+    const refreshBudgetsList = async () => {
+        setBudgetsLoading(true);
+        try {
+            const token = localStorage.getItem("authToken");
+            if (!token) return;
 
-                const headers: HeadersInit = token 
-                    ? { "Authorization": `Bearer ${token}` } 
-                    : {};
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+            const res = await fetch(`${apiUrl}/api/budget/my-budgets`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
 
-                const res = await fetch(url, { headers });
-
-                if (!res.ok) {
-                    if (res.status === 401) console.log("Nieautoryzowany dostęp");
-                    setBudgets([]);
-                    return;
-                }
-                const data = await res.json();
-
-                if (Array.isArray(data)) {
-                    setRawData(data);
-                } else {
-                    setRawData([]);
-                }
-            } catch (e) {
-                console.error("Błąd pobierania danych", e);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [selectedYear, selectedMonth]);
-
-    useEffect(() => {
-        const fetchBudgets = async () => {
-            setBudgetsLoading(true);
-            try {
-                const token = localStorage.getItem("authToken"); 
-                if (!token) {
-                    setBudgets([]);
-                    setBudgetsLoading(false);
-                    return; 
-                }
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-                const res = await fetch(`${apiUrl}/api/budget/my-budgets`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (!res.ok) {
-                    setBudgets([]);
-                    return;
-                }
-
+            if (res.ok) {
                 const data = await res.json();
                 let budgetsArray: Budget[] = [];
-
                 if (Array.isArray(data)) {
                     budgetsArray = data;
                 } else if ('data' in data && Array.isArray(data.data)) {
                     budgetsArray = data.data;
                 }
-
                 setBudgets(budgetsArray);
+            } else {
+                 setBudgets([]);
+            }
+        } catch (e) {
+            console.error("Błąd pobierania budżetów", e);
+            setBudgets([]);
+        } finally {
+            setBudgetsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            const token = localStorage.getItem("authToken");
+            if (!token) return;
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+
+            const fetchUser = async () => {
+                try {
+                    const res = await fetch(`${apiUrl}/api/authentication/me`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data: UserResponse = await res.json();
+                        if (data.userName) setUserName(data.userName);
+                    }
+                } catch (error) {
+                    console.error("Błąd user data", error);
+                }
+            };
+
+            await Promise.all([
+                fetchUser(),
+                refreshBudgetsList()
+            ]);
+        };
+
+        fetchInitialData();
+    }, []);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            setLoading(true);
+            try {
+                const token = localStorage.getItem("authToken");
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+                const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}`;
+
+                const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
+                const res = await fetch(url, { headers });
+
+                if (!res.ok) {
+                    if (res.status === 401) console.log("Nieautoryzowany dostęp");
+                    setBudgets([]); 
+                    return;
+                }
+                const data = await res.json();
+                setRawData(Array.isArray(data) ? data : []);
             } catch (e) {
-                console.error("Błąd pobierania budżetów", e);
-                setBudgets([]);
+                console.error("Błąd pobierania statystyk", e);
             } finally {
-                setBudgetsLoading(false);
+                setLoading(false);
             }
         };
 
-        fetchBudgets();
-    }, []);
-
+        fetchStats();
+    }, [selectedYear, selectedMonth]);
     const totalExpenses = rawData.reduce(
         (acc, curr) => acc + (Number(curr.amount) || 0),
         0
@@ -181,24 +196,7 @@ function DashboardPage() {
             }
 
             setIsCreateModalOpen(false);
-
-           const refreshRes = await fetch(`${apiUrl}/api/budget/my-budgets`, {
-                headers: {
-                    "Authorization": `Bearer ${token}` 
-                }
-            });
-            if (refreshRes.ok) {
-                const data = (await refreshRes.json()) as ApiResponse;
-                let budgetsArray: Budget[] = [];
-
-                if (Array.isArray(data)) {
-                    budgetsArray = data;
-                } else if ('data' in data && Array.isArray(data.data)) {
-                    budgetsArray = data.data;
-                }
-
-                setBudgets(budgetsArray);
-            }
+            await refreshBudgetsList();            
         } catch (e) {
             console.error("Błąd tworzenia budżetu", e);
             setCreateError("Wystąpił błąd podczas tworzenia budżetu.");
@@ -250,10 +248,8 @@ function DashboardPage() {
                             <div className={styles.emptyTextColumn}>
                                 <h1 className={styles.greetingTitle}>
                                     Cześć,{" "}
-                                    <span
-                                        className={styles.greetingHighlight}
-                                    >
-                                        [imię użytkownika]
+                                    <span className={styles.greetingHighlight}>
+                                        {userName} 
                                     </span>
                                     !
                                     </h1>
@@ -319,7 +315,7 @@ function DashboardPage() {
                                         <span
                                             className={styles.greetingHighlight}
                                         >
-                                            [imię użytkownika]
+                                           {userName}
                                         </span>
                                         !
                                     </h1>
