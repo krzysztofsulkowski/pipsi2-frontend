@@ -45,11 +45,21 @@ function DashboardPage() {
         const fetchData = async () => {
             setLoading(true);
             try {
+                const token = localStorage.getItem("authToken"); 
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-
                 const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}`;
 
-                const res = await fetch(url);
+                const headers: HeadersInit = token 
+                    ? { "Authorization": `Bearer ${token}` } 
+                    : {};
+
+                const res = await fetch(url, { headers });
+
+                if (!res.ok) {
+                    if (res.status === 401) console.log("Nieautoryzowany dostęp");
+                    setBudgets([]);
+                    return;
+                }
                 const data = await res.json();
 
                 if (Array.isArray(data)) {
@@ -71,8 +81,18 @@ function DashboardPage() {
         const fetchBudgets = async () => {
             setBudgetsLoading(true);
             try {
+                const token = localStorage.getItem("authToken"); 
+                if (!token) {
+                    setBudgets([]);
+                    setBudgetsLoading(false);
+                    return; 
+                }
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-                const res = await fetch(`${apiUrl}/api/budget/my-budgets`);
+                const res = await fetch(`${apiUrl}/api/budget/my-budgets`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
 
                 if (!res.ok) {
                     setBudgets([]);
@@ -131,6 +151,14 @@ function DashboardPage() {
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
+             const token = localStorage.getItem("authToken");
+
+            if (!token) {
+                setCreateError("Nie jesteś zalogowany.");
+                setIsCreating(false);
+                return;
+            }
+
             const body: any = {
                 name: newBudgetName.trim()
             };
@@ -138,7 +166,8 @@ function DashboardPage() {
             const res = await fetch(`${apiUrl}/api/budget/create`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(body)
             });
@@ -150,7 +179,11 @@ function DashboardPage() {
 
             setIsCreateModalOpen(false);
 
-            const refreshRes = await fetch(`${apiUrl}/api/budget/my-budgets`);
+           const refreshRes = await fetch(`${apiUrl}/api/budget/my-budgets`, {
+                headers: {
+                    "Authorization": `Bearer ${token}` 
+                }
+            });
             if (refreshRes.ok) {
                 const data = await refreshRes.json();
                 let budgetsArray: Budget[] = [];
