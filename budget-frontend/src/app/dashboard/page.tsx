@@ -5,6 +5,7 @@ import styles from "./Dashboard.module.css";
 import CategoryChart from "./charts/CategoryChart";
 import UserBarChart from "./charts/UserBarChart";
 import Link from "next/link";
+import Image from "next/image";
 
 const currencySymbol = "zł";
 
@@ -20,8 +21,10 @@ interface Budget {
     id?: number;
     name?: string;
     budgetName?: string;
-    [key: string]: any;
+    [key: string]: string | number | undefined | unknown; 
 }
+
+type ApiResponse = Budget[] | { data: Budget[] };
 
 function DashboardPage() {
     const currentYear = new Date().getFullYear();
@@ -104,8 +107,8 @@ function DashboardPage() {
 
                 if (Array.isArray(data)) {
                     budgetsArray = data;
-                } else if (Array.isArray((data as any).data)) {
-                    budgetsArray = (data as any).data;
+                } else if ('data' in data && Array.isArray(data.data)) {
+                    budgetsArray = data.data;
                 }
 
                 setBudgets(budgetsArray);
@@ -159,7 +162,7 @@ function DashboardPage() {
                 return;
             }
 
-            const body: any = {
+            const body = {
                 name: newBudgetName.trim()
             };
 
@@ -185,13 +188,13 @@ function DashboardPage() {
                 }
             });
             if (refreshRes.ok) {
-                const data = await refreshRes.json();
+                const data = (await refreshRes.json()) as ApiResponse;
                 let budgetsArray: Budget[] = [];
 
                 if (Array.isArray(data)) {
                     budgetsArray = data;
-                } else if (Array.isArray((data as any).data)) {
-                    budgetsArray = (data as any).data;
+                } else if ('data' in data && Array.isArray(data.data)) {
+                    budgetsArray = data.data;
                 }
 
                 setBudgets(budgetsArray);
