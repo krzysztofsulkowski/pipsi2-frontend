@@ -5,7 +5,6 @@ import { JWT } from 'google-auth-library';
 
 export async function POST() {
   try {
-    console.log("🚀 [API] Synchronizacja danych...");
 
     const isLocal = process.env.DB_HOST === 'localhost' || process.env.DB_HOST === '127.0.0.1';
 
@@ -39,7 +38,6 @@ export async function POST() {
     client.release();
     await pool.end();
 
-    console.log(`✅ [DB] Pobrano ${rows.length} wierszy.`);
 
     const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
     const privateKey = process.env.GOOGLE_PRIVATE_KEY;

@@ -1,7 +1,6 @@
 "use client";
 
 import styles from "./Reset.module.css";
-import logo from "./logo.svg";
 import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
@@ -118,7 +117,7 @@ function ResetPasswordForm() {
                     <section className={styles.leftPanel}>
                         <div className={styles.logoWrapper}>
                             <img
-                                src={logo.src}
+                                src="/logo.svg"
                                 alt="Logo aplikacji"
                                 className={styles.logoImage}
                             />
@@ -147,7 +146,7 @@ function ResetPasswordForm() {
                 <section className={styles.leftPanel}>
                     <div className={styles.logoWrapper}>
                         <img
-                            src={logo.src}
+                            src="/logo.svg"
                             alt="Logo aplikacji"
                             className={styles.logoImage}
                         />
