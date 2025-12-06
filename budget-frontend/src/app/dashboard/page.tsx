@@ -290,9 +290,13 @@ function DashboardPage() {
                             </div>
 
                                 <div className={styles.heroGraphic}>
-                                    <img
+                                     <Image
                                         src="/wallet.svg"
+                                        alt="Portfel"
+                                        width={400}
+                                        height={400}
                                         className={styles.heroImage}
+                                        priority
                                     />
                                 </div>
                         </div>
@@ -540,7 +544,7 @@ function DashboardPage() {
                                             className={styles.historyButton}
                                         >
                                             <div className={styles.historyIcon}>
-                                                <img
+                                                <Image
                                                     src="/history-icon.svg"
                                                     alt="Ikona historii"
                                                     width={51}
