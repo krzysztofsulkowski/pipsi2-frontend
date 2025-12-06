@@ -18,8 +18,8 @@ export interface Transaction {
 }
 
 interface Budget {
-    id?: number;
-    name?: string;
+    id: number;
+    name: string;
     budgetName?: string;
     [key: string]: string | number | undefined | unknown; 
 }
@@ -46,10 +46,14 @@ function DashboardPage() {
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [budgetsLoading, setBudgetsLoading] = useState(true);
 
+    const [selectedBudgetId, setSelectedBudgetId] = useState<number | null>(null);
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newBudgetName, setNewBudgetName] = useState("");
     const [createError, setCreateError] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
+
+    const currentBudget = budgets.find(b => b.id === selectedBudgetId);
 
     const refreshBudgetsList = async () => {
         setBudgetsLoading(true);
@@ -71,6 +75,14 @@ function DashboardPage() {
                     budgetsArray = data.data;
                 }
                 setBudgets(budgetsArray);
+
+                if (budgetsArray.length > 0) {
+                     const stillExists = selectedBudgetId && budgetsArray.some(b => b.id === selectedBudgetId);
+                     if (!stillExists) {
+                         setSelectedBudgetId(budgetsArray[0].id);
+                     }
+                }
+
             } else {
                  setBudgets([]);
             }
@@ -137,7 +149,7 @@ function DashboardPage() {
         };
 
         fetchStats();
-    }, [selectedYear, selectedMonth]);
+    }, [selectedYear, selectedMonth, selectedBudgetId]);
     const totalExpenses = rawData.reduce(
         (acc, curr) => acc + (Number(curr.amount) || 0),
         0
@@ -209,13 +221,27 @@ function DashboardPage() {
         <div className={styles.page}>
             <header className={styles.header}>
                 <div className={styles.headerLeft}>
-                    <div className={styles.logo}>BALANCR</div>
+                    <img src="/logo.svg" alt="Logo aplikacji" className={styles.logoImage}/>
                     {hasBudgets && (
                         <div className={styles.budgetSelector}>
-                            <button className={styles.budgetButton}>
-                                <span>[nazwa wybranego budżetu]</span>
-                                <span className={styles.budgetArrow}>▼</span>
-                            </button>
+                            <select 
+                                className={styles.budgetButton} 
+                                value={selectedBudgetId || ""}
+                                onChange={(e) => setSelectedBudgetId(Number(e.target.value))}
+                                style={{
+                                    border: 'none',
+                                    outline: 'none',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold',
+                                    textAlign: 'left'
+                                }}
+                            >
+                                {budgets.map(b => (
+                                    <option key={b.id} value={b.id} style={{color: '#000'}}>
+                                        {b.name || b.budgetName || `Budżet #${b.id}`}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     )}
                 </div>
