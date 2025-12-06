@@ -22,9 +22,10 @@ export default function BudgetReport({ reportUrl }: BudgetReportProps) {
             
             alert(`✅ Dane odświeżone (${data.count} wierszy). Wykres zostanie zaktualizowany.`);
 
-        } catch (error: any) {
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Unknown error";
             console.error("Błąd odświeżania:", error);
-            alert(`❌ Wystąpił błąd: ${error.message}`);
+            alert(`❌ Wystąpił błąd: ${message}`);
         } finally {
             setIsRefreshing(false);
         }
@@ -33,14 +34,13 @@ export default function BudgetReport({ reportUrl }: BudgetReportProps) {
     return (
         <div className="flex flex-col gap-2 w-full h-full" style={{ minHeight: '350px' }}>
             
-            {/* Przycisk */}
             <div className="flex justify-end pr-1">
                 <button 
                     onClick={handleRefresh}
                     disabled={isRefreshing}
                     style={{
                         padding: '4px 10px',
-                        backgroundColor: isRefreshing ? '#4B5563' : '#374151', // Ciemnoszary zamiast niebieskiego (mniej rozpraszający)
+                        backgroundColor: isRefreshing ? '#4B5563' : '#374151', 
                         color: 'white',
                         border: '1px solid #6B7280',
                         borderRadius: '4px',
@@ -57,7 +57,6 @@ export default function BudgetReport({ reportUrl }: BudgetReportProps) {
                 </button>
             </div>
 
-            {/* Ramka z wykresem */}
             <div style={{ flexGrow: 1, borderRadius: '6px', overflow: 'hidden', background: '#272C3C' }}>
                 <iframe
                     key={iframeKey}

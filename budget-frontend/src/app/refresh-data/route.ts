@@ -58,7 +58,7 @@ export async function POST() {
     const headerRow = rows.length > 0 ? Object.keys(rows[0]) : 
         ['Id', 'Nazwa Budzetu', 'Zarchiwizowany', 'Rola Uzytkownika', 'Uzytkownik', 'Email'];
     
-    const values = rows.map((row: any) => Object.values(row).map((val: any) => {
+     const values = rows.map((row: Record<string, unknown>) => Object.values(row).map((val: unknown) => {
         if (val === null || val === undefined) return "";
         if (val instanceof Date) return val.toISOString().slice(0, 19).replace('T', ' '); 
         if (typeof val === 'boolean') return val ? "TAK" : "NIE";
@@ -76,10 +76,12 @@ export async function POST() {
 
     return NextResponse.json({ success: true, count: rows.length });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("❌ Błąd SQL:", error);
+    const errorMessage = error instanceof Error ? error.message : "Wystąpił nieznany błąd";
+
     return NextResponse.json(
-      { success: false, error: error.message }, 
+      { success: false, error: errorMessage }, 
       { status: 500 }
     );
   }
