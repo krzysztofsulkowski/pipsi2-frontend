@@ -6,23 +6,9 @@ import CategoryChart from "./charts/CategoryChart";
 import UserBarChart from "./charts/UserBarChart";
 import Link from "next/link";
 import Image from "next/image";
+import { Transaction, Budget } from "@/types";
 
 const currencySymbol = "zł";
-
-export interface Transaction {
-    category?: string;
-    Category?: string;
-    amount?: number | string;
-    Amount?: number | string;
-    userName?: string;
-}
-
-interface Budget {
-    id: number;
-    name: string;
-    budgetName?: string;
-    [key: string]: string | number | undefined | unknown; 
-}
 
 interface UserResponse {
     userName: string;
@@ -76,11 +62,13 @@ function DashboardPage() {
                 }
                 setBudgets(budgetsArray);
 
-                if (budgetsArray.length > 0) {
-                     const stillExists = selectedBudgetId && budgetsArray.some(b => b.id === selectedBudgetId);
-                     if (!stillExists) {
+                 if (budgetsArray.length > 0) {
+                     const currentIdValid = selectedBudgetId && budgetsArray.some(b => b.id === selectedBudgetId);
+                     if (!currentIdValid) {
                          setSelectedBudgetId(budgetsArray[0].id);
                      }
+                } else {
+                    setLoading(false); 
                 }
 
             } else {
@@ -124,18 +112,21 @@ function DashboardPage() {
     }, []);
 
     useEffect(() => {
-        const fetchStats = async () => {
+        if (!selectedBudgetId) {
+                return; 
+        }
+        const fetchStats = async () => {            
             setLoading(true);
             try {
                 const token = localStorage.getItem("authToken");
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-                const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}`;
+                 const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}&budgetId=${selectedBudgetId}`;
 
                 const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
                 const res = await fetch(url, { headers });
 
                 if (!res.ok) {
-                    if (res.status === 401) console.log("Nieautoryzowany dostęp");
+                    if (res.status === 401) 
                     setBudgets([]); 
                     return;
                 }
@@ -150,10 +141,20 @@ function DashboardPage() {
 
         fetchStats();
     }, [selectedYear, selectedMonth, selectedBudgetId]);
-    const totalExpenses = rawData.reduce(
-        (acc, curr) => acc + (Number(curr.amount) || 0),
-        0
+    const { totalIncome, totalExpenses } = rawData.reduce(
+        (acc, curr) => {
+            const amount = Number(curr.amount) || 0;
+            if (curr.type === 0) { 
+                acc.totalIncome += amount;
+            } else if (curr.type === 1) { // Wydatek
+                acc.totalExpenses += amount;
+            }
+            return acc;
+        },
+        { totalIncome: 0, totalExpenses: 0 }
     );
+
+    const currentBalance = totalIncome - totalExpenses;
 
     const hasBudgets = budgets.length > 0;
 
@@ -442,8 +443,11 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
+                                         style={{ 
+                                                color: currentBalance < 0 ? '#EF4444' : '#10B981' 
+                                            }}
                                         >
-                                            --,--
+                                            {loading ? "--,--" : currentBalance.toFixed(2)}
                                         </span>
                                         <span
                                             className={styles.cardValueCurrency}
@@ -490,8 +494,9 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                        >
-                                            --,--
+                                            style={{ color: '#10B981' }} 
+                                            >
+                                            {loading ? "--,--" : totalIncome.toFixed(2)}
                                         </span>
                                         <span
                                             className={styles.cardValueCurrency}
@@ -517,8 +522,9 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                        >
-                                            {totalExpenses.toFixed(2)}
+                                            style={{ color: '#EF4444' }} 
+                                            >
+                                            {loading ? "--,--" : totalExpenses.toFixed(2)}
                                         </span>
                                         <span
                                             className={styles.cardValueCurrency}
@@ -544,23 +550,23 @@ function DashboardPage() {
                                         </p>
                                     </div>
                                     <div className={styles.historyBody}>
-                                        <p
-                                            className={
-                                                styles.historyEmptyTitle
-                                            }
-                                        >
-                                            Brak danych do wyświetlenia.
-                                        </p>
-                                        <p
-                                            className={
-                                                styles.historyEmptyText
-                                            }
-                                        >
-                                            Dodaj swoje pierwsze
-                                            przychody i wydatki, aby
-                                            zobaczyć historię
-                                            transakcji.
-                                        </p>
+                                        {rawData.length === 0 ? (
+                                            <>
+                                                <p className={styles.historyEmptyTitle}>Brak danych.</p>
+                                                <p className={styles.historyEmptyText}>Dodaj pierwsze transakcje.</p>
+                                            </>
+                                        ) : (
+                                            /*5 ostatnich transakcji */
+                                            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                                {rawData.slice(0, 5).map((t, idx) => (
+                                                    <div key={idx} style={{display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px'}}>
+                                                        <div style={{display: 'flex', flexDirection: 'column'}}>
+                                                            <span style={{color: 'white', fontSize: '13px'}}>{t.title || t.categoryName}</span>
+                                                            <span style={{color: '#9CA3AF', fontSize: '11px'}}>{t.userName}</span>
+                                                        </div>
+                                                        <span style={{color: '#EAC278', fontWeight: '600'}}>{Number(t.amount).toFixed(2)} zł</span>
+                                                    </div>
+                                                ))}
                                         <Link
                                             href="/transactions"
                                             className={styles.historyButton}
@@ -581,6 +587,8 @@ function DashboardPage() {
                                                 ZOBACZ PEŁNĄ HISTORIĘ
                                             </span>
                                         </Link>
+                                        </div>
+                                        )}
                                     </div>
                                 </div>
 

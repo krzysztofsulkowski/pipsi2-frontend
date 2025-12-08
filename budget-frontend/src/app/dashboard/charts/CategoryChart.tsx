@@ -1,13 +1,7 @@
 'use client';
 
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-interface Transaction {
-    category?: string;
-    Category?: string;
-    amount?: number | string;
-    Amount?: number | string;
-}
+import { Transaction } from "@/types";
 
 const COLORS = [
     '#6A7192', 
@@ -22,8 +16,8 @@ export default function CategoryChart({ data }: { data: Transaction[] }) {
     const safeData = Array.isArray(data) ? data : [];
 
     const groupedData = safeData.reduce((acc: Record<string, number>, curr: Transaction) => {
-        const cat = curr.category || curr.Category || 'Inne';
-        const amount = Number(curr.amount || curr.Amount) || 0;
+        const cat = curr.categoryName || 'Inne';
+        const amount = Number(curr.amount) || 0;
         
         if (!acc[cat]) acc[cat] = 0;
         acc[cat] += amount;
