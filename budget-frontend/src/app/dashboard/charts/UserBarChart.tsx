@@ -1,11 +1,7 @@
 'use client';
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-
-interface Transaction {
-    userName?: string;
-    amount?: number | string;
-}
+import { Transaction } from "@/types";
 
 export default function UserBarChart({ data }: { data: Transaction[] }) {
     
