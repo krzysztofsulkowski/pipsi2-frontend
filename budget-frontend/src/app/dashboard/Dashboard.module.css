@@ -2,7 +2,7 @@
     min-height: 100vh;
     background: #272C3C;
     color: #F9FAFB;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--font-baloo);
     padding: 20px 50px 36px;
     box-sizing: border-box;
 }
@@ -96,7 +96,7 @@
 }
 
 .greetingTitle {
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 600;
     margin-bottom: 4px;
 }
@@ -106,8 +106,10 @@
 }
 
 .greetingSubtitle {
-    font-size: 14px;
+    margin-top: 20px;
+    font-size: 16px;
     color: #C9CCD6;
+    font-family: var(--font-afacad);
 }
 
 .greetingUnderline {
@@ -147,16 +149,17 @@
 }
 
 .cardTitle {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 500;
     margin-bottom: 3px;
 }
 
 .cardDescription {
-    font-size: 11px;
+    font-size: 13px;
     color: #C9CCD6;
     line-height: 1.45;
     margin-top: 8px;
+    font-family: var(--font-afacad);
 }
 
 .cardValue {
@@ -167,13 +170,13 @@
 }
 
 .cardValueNumber {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 600;
 }
 
 .cardValueCurrency {
-    font-size: 13px;
-    color: #C9CCD6;
+    font-size: 30px;
+    color: #EAC278;
 }
 
 .cardActions {
@@ -183,9 +186,10 @@
 .primaryButton,
 .secondaryButton {
     width: 100%;
-    padding: 9px 14px;
-    border-radius: 12px;
-    font-size: 12px;
+    padding: 11px 16px;
+    border-radius: 14px;
+    font-family: var(--font-afacad);
+    font-size: 14px;
     font-weight: 500;
     text-transform: uppercase;
     cursor: pointer;
@@ -194,6 +198,7 @@
     border: none;
     transition: background 0.15s ease, transform 0.05s ease;
 }
+
 
     .primaryButton:hover,
     .secondaryButton:hover {
@@ -213,10 +218,10 @@
     border-radius: 15px;
     border: 1.5px solid #FFFFFF;
     padding: 16px 18px 18px;
-    min-height: 160px;
+    min-height: 190px;
     box-shadow: 0 10px 24px rgba(10, 12, 20, 0.45);
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
 }
 
 .historyHeader {
@@ -228,16 +233,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; 
-    font-size: 12px;
-    gap: 20px; 
+    justify-content: center;
+    font-size: 14px;
+    gap: 22px;
     padding-bottom: 10px;
 }
 
+
 .historyButton {
-    width: 210px;     
-    height: 48px;       
-    border-radius: 8px; 
+    width: 210px;
+    height: 54px;
+    border-radius: 8px;
     background: #3A4055;
     border: none;
     cursor: pointer;
@@ -247,7 +253,8 @@
     gap: 10px;
     transition: background 0.3s ease, transform 0.2s;
     padding: 0;
-    text-decoration: none; 
+    text-decoration: none;
+    font-family: var(--font-afacad);
 }
 
 .historyButton:hover {
@@ -282,14 +289,14 @@
 
 .fabItem {
     width: 100%;
-    min-height: 95px;
-    padding: 10px 12px;
+    min-height: 110px;
+    padding: 12px 14px;
     border-radius: 15px;
     border: 1.5px solid #FFFFFF;
     background: #1F2330;
     cursor: pointer;
     text-align: center;
-    font-size: 13px;
+    font-size: 15px;
     color: #F9FAFB;
     box-shadow: 0 8px 20px rgba(8, 10, 18, 0.4);
     display: flex;
@@ -303,6 +310,7 @@
 
 .fabLabel {
     display: inline-block;
+    font-family: var(--font-afacad);
 }
 
 .statsGrid {
@@ -317,7 +325,7 @@
     border-radius: 15px;
     border: 1.5px solid #FFFFFF;
     padding: 16px 18px 18px;
-    min-height: 300px;
+    min-height: 340px;
     box-shadow: 0 10px 24px rgba(10, 12, 20, 0.45);
     display: flex;
     flex-direction: column;
@@ -328,12 +336,12 @@
 }
 
 .statsTitle {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 500;
 }
 
 .statsSubtitle {
-    font-size: 12px;
+    font-size: 14px;
     color: #C9CCD6;
 }
 
@@ -342,10 +350,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: var(--font-afacad);
 }
 
 .statsEmptyText {
-    font-size: 12px;
+    font-size: 14px;
     color: #C9CCD6;
     line-height: 1.5;
 }
@@ -356,27 +365,33 @@
 }
 
 .footerText {
-    font-size: 11px;
+    font-size: 22px;
     color: #C9CCD6;
-    max-width: 540px;
-    margin: 0 auto 14px;
+    max-width: 800px;
+    margin: 60px auto 14px;
+    font-family: var(--font-afacad);
 }
 
 .footerButton {
-    padding: 10px 24px;
+    padding: 11px 26px;
     border-radius: 52px;
     border: none;
     background: #1F2330;
     color: #FFFFFF;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 500;
     text-transform: uppercase;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.05s ease;
+    font-family: var(--font-afacad);
+    margin: 20px auto 14px;
+    width: 320px;
+    height: 56px;
 }
 
     .footerButton:hover {
-        background: #232838;
+        background: #EAC278;
+        color: #1F2330;
         transform: translateY(-1px);
     }
 
@@ -533,7 +548,7 @@
 }
 
 .modalTitle {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     margin-bottom: 14px;
     color: #F9FAFB;
@@ -552,7 +567,7 @@
 }
 
 .modalLabel {
-    font-size: 12px;
+    font-size: 14px;
     color: #C9CCD6;
 }
 
@@ -560,8 +575,8 @@
     border-radius: 10px;
     border: 1px solid #494F60;
     background: #272C3C;
-    padding: 8px 10px;
-    font-size: 13px;
+    padding: 9px 12px;
+    font-size: 14px;
     color: #F9FAFB;
 }
 
@@ -585,7 +600,7 @@
 .modalSecondaryButton {
     padding: 7px 13px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 13px;
     border: 1px solid #494F60;
     background: transparent;
     color: #F9FAFB;
@@ -600,7 +615,7 @@
 .modalPrimaryButton {
     padding: 7px 14px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 13px;
     border: none;
     background: #EAC278;
     color: #272C3C;
