@@ -39,6 +39,8 @@ function DashboardPage() {
     const [createError, setCreateError] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
 
+    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
     const currentBudget = budgets.find(b => b.id === selectedBudgetId);
 
     const refreshBudgetsList = async () => {
@@ -62,17 +64,17 @@ function DashboardPage() {
                 }
                 setBudgets(budgetsArray);
 
-                 if (budgetsArray.length > 0) {
-                     const currentIdValid = selectedBudgetId && budgetsArray.some(b => b.id === selectedBudgetId);
-                     if (!currentIdValid) {
-                         setSelectedBudgetId(budgetsArray[0].id);
-                     }
+                if (budgetsArray.length > 0) {
+                    const currentIdValid = selectedBudgetId && budgetsArray.some(b => b.id === selectedBudgetId);
+                    if (!currentIdValid) {
+                        setSelectedBudgetId(budgetsArray[0].id);
+                    }
                 } else {
-                    setLoading(false); 
+                    setLoading(false);
                 }
 
             } else {
-                 setBudgets([]);
+                setBudgets([]);
             }
         } catch (e) {
             console.error("Błąd pobierania budżetów", e);
@@ -113,21 +115,21 @@ function DashboardPage() {
 
     useEffect(() => {
         if (!selectedBudgetId) {
-                return; 
+            return;
         }
-        const fetchStats = async () => {            
+        const fetchStats = async () => {
             setLoading(true);
             try {
                 const token = localStorage.getItem("authToken");
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-                 const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}&budgetId=${selectedBudgetId}`;
+                const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}&budgetId=${selectedBudgetId}`;
 
                 const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
                 const res = await fetch(url, { headers });
 
                 if (!res.ok) {
-                    if (res.status === 401) 
-                    setBudgets([]); 
+                    if (res.status === 401)
+                        setBudgets([]);
                     return;
                 }
                 const data = await res.json();
@@ -144,7 +146,7 @@ function DashboardPage() {
     const { totalIncome, totalExpenses } = rawData.reduce(
         (acc, curr) => {
             const amount = Number(curr.amount) || 0;
-            if (curr.type === 0) { 
+            if (curr.type === 0) {
                 acc.totalIncome += amount;
             } else if (curr.type === 1) { // Wydatek
                 acc.totalExpenses += amount;
@@ -182,7 +184,7 @@ function DashboardPage() {
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
-             const token = localStorage.getItem("authToken");
+            const token = localStorage.getItem("authToken");
 
             if (!token) {
                 setCreateError("Nie jesteś zalogowany.");
@@ -209,7 +211,7 @@ function DashboardPage() {
             }
 
             setIsCreateModalOpen(false);
-            await refreshBudgetsList();            
+            await refreshBudgetsList();
         } catch (e) {
             console.error("Błąd tworzenia budżetu", e);
             setCreateError("Wystąpił błąd podczas tworzenia budżetu.");
@@ -222,11 +224,11 @@ function DashboardPage() {
         <div className={styles.page}>
             <header className={styles.header}>
                 <div className={styles.headerLeft}>
-                    <img src="/logo.svg" alt="Logo aplikacji" className={styles.logoImage}/>
+                    <img src="/logo.svg" alt="Logo aplikacji" className={styles.logoImage} />
                     {hasBudgets && (
                         <div className={styles.budgetSelector}>
-                            <select 
-                                className={styles.budgetButton} 
+                            <select
+                                className={styles.budgetButton}
                                 value={selectedBudgetId || ""}
                                 onChange={(e) => setSelectedBudgetId(Number(e.target.value))}
                                 style={{
@@ -238,7 +240,7 @@ function DashboardPage() {
                                 }}
                             >
                                 {budgets.map(b => (
-                                    <option key={b.id} value={b.id} style={{color: '#000'}}>
+                                    <option key={b.id} value={b.id} style={{ color: '#000' }}>
                                         {b.name || b.budgetName || `Budżet #${b.id}`}
                                     </option>
                                 ))}
@@ -259,6 +261,51 @@ function DashboardPage() {
                     <Link href="/about-us" className={styles.navLink}>
                         O nas
                     </Link>
+
+                    <div className={styles.profileMenu}>
+                        <button
+                            type="button"
+                            className={styles.profileButton}
+                            onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                        >
+                            <Image
+                                src="/profile-icon.svg"
+                                alt="Profil"
+                                width={22}
+                                height={22}
+                            />
+                        </button>
+
+                        {isProfileMenuOpen && (
+                            <div className={styles.profileDropdown}>
+                                <button
+                                    type="button"
+                                    className={styles.profileDropdownItem}
+                                    onClick={() => setIsProfileMenuOpen(false)}
+                                >
+                                    Ustawienia
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className={styles.profileDropdownItem}
+                                    onClick={() => setIsProfileMenuOpen(false)}
+                                >
+                                    Zmiana języka
+                                </button>
+
+                                <div className={styles.profileDropdownDivider} />
+
+                                <button
+                                    type="button"
+                                    className={styles.profileDropdownItemDanger}
+                                    onClick={() => setIsProfileMenuOpen(false)}
+                                >
+                                    Wyloguj się
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </nav>
             </header>
 
@@ -276,11 +323,11 @@ function DashboardPage() {
                                 <h1 className={styles.greetingTitle}>
                                     Cześć,{" "}
                                     <span className={styles.greetingHighlight}>
-                                        {userName} 
+                                        {userName}
                                     </span>
                                     !
-                                    </h1>
-                                    <div className={styles.greetingUnderline} />
+                                </h1>
+                                <div className={styles.greetingUnderline} />
 
                                 <p className={styles.emptySubtitle}>
                                     Twoja finansowa{" "}
@@ -312,16 +359,16 @@ function DashboardPage() {
                                 </div>
                             </div>
 
-                                <div className={styles.heroGraphic}>
-                                     <Image
-                                        src="/wallet.svg"
-                                        alt="Portfel"
-                                        width={400}
-                                        height={400}
-                                        className={styles.heroImage}
-                                        priority
-                                    />
-                                </div>
+                            <div className={styles.heroGraphic}>
+                                <Image
+                                    src="/wallet.svg"
+                                    alt="Portfel"
+                                    width={400}
+                                    height={400}
+                                    className={styles.heroImage}
+                                    priority
+                                />
+                            </div>
                         </div>
                     </section>
                 ) : (
@@ -342,12 +389,12 @@ function DashboardPage() {
                                         <span
                                             className={styles.greetingHighlight}
                                         >
-                                           {userName}
+                                            {userName}
                                         </span>
                                         !
                                     </h1>
 
-                                <div className={styles.greetingUnderline} />
+                                    <div className={styles.greetingUnderline} />
 
                                     <p className={styles.greetingSubtitle}>
                                         Twoja finansowa{" "}
@@ -374,7 +421,7 @@ function DashboardPage() {
                                     </p>
                                 </div>
 
-                                <div 
+                                <div
                                     style={{ display: "flex", gap: "10px" }}
                                 >
                                     <select
@@ -443,8 +490,8 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                         style={{ 
-                                                color: currentBalance < 0 ? '#EF4444' : '#10B981' 
+                                            style={{
+                                                color: currentBalance < 0 ? '#EF4444' : '#10B981'
                                             }}
                                         >
                                             {loading ? "--,--" : currentBalance.toFixed(2)}
@@ -494,8 +541,8 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                            style={{ color: '#10B981' }} 
-                                            >
+                                            style={{ color: '#10B981' }}
+                                        >
                                             {loading ? "--,--" : totalIncome.toFixed(2)}
                                         </span>
                                         <span
@@ -522,8 +569,8 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                            style={{ color: '#EF4444' }} 
-                                            >
+                                            style={{ color: '#EF4444' }}
+                                        >
                                             {loading ? "--,--" : totalExpenses.toFixed(2)}
                                         </span>
                                         <span
@@ -557,37 +604,37 @@ function DashboardPage() {
                                             </>
                                         ) : (
                                             /*5 ostatnich transakcji */
-                                            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                                 {rawData.slice(0, 5).map((t, idx) => (
-                                                    <div key={idx} style={{display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px'}}>
-                                                        <div style={{display: 'flex', flexDirection: 'column'}}>
-                                                            <span style={{color: 'white', fontSize: '13px'}}>{t.title || t.categoryName}</span>
-                                                            <span style={{color: '#9CA3AF', fontSize: '11px'}}>{t.userName}</span>
+                                                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
+                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                            <span style={{ color: 'white', fontSize: '13px' }}>{t.title || t.categoryName}</span>
+                                                            <span style={{ color: '#9CA3AF', fontSize: '11px' }}>{t.userName}</span>
                                                         </div>
-                                                        <span style={{color: '#EAC278', fontWeight: '600'}}>{Number(t.amount).toFixed(2)} zł</span>
+                                                        <span style={{ color: '#EAC278', fontWeight: '600' }}>{Number(t.amount).toFixed(2)} zł</span>
                                                     </div>
                                                 ))}
-                                        <Link
-                                            href="/transactions"
-                                            className={styles.historyButton}
-                                        >
-                                            <div className={styles.historyIcon}>
-                                                <Image
-                                                    src="/history-icon.svg"
-                                                    alt="Ikona historii"
-                                                    width={51}
-                                                    height={51}
-                                                />
+                                                <Link
+                                                    href="/transactions"
+                                                    className={styles.historyButton}
+                                                >
+                                                    <div className={styles.historyIcon}>
+                                                        <Image
+                                                            src="/history-icon.svg"
+                                                            alt="Ikona historii"
+                                                            width={51}
+                                                            height={51}
+                                                        />
+                                                    </div>
+                                                    <span
+                                                        className={
+                                                            styles.historyButtonText
+                                                        }
+                                                    >
+                                                        ZOBACZ PEŁNĄ HISTORIĘ
+                                                    </span>
+                                                </Link>
                                             </div>
-                                            <span
-                                                className={
-                                                    styles.historyButtonText
-                                                }
-                                            >
-                                                ZOBACZ PEŁNĄ HISTORIĘ
-                                            </span>
-                                        </Link>
-                                        </div>
                                         )}
                                     </div>
                                 </div>
