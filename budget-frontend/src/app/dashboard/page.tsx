@@ -227,27 +227,31 @@ function DashboardPage() {
                     <img src="/logo.svg" alt="Logo aplikacji" className={styles.logoImage} />
                     {hasBudgets && (
                         <div className={styles.budgetSelector}>
-                            <select
-                                className={styles.budgetButton}
-                                value={selectedBudgetId || ""}
-                                onChange={(e) => setSelectedBudgetId(Number(e.target.value))}
-                                style={{
-                                    border: 'none',
-                                    outline: 'none',
-                                    cursor: 'pointer',
-                                    fontWeight: 'bold',
-                                    textAlign: 'left'
-                                }}
-                            >
-                                {budgets.map(b => (
-                                    <option key={b.id} value={b.id} style={{ color: '#000' }}>
-                                        {b.name || b.budgetName || `Budżet #${b.id}`}
-                                    </option>
-                                ))}
-                            </select>
+                            <div className={styles.budgetSelectWrapper}>
+                                <select
+                                    className={styles.budgetButton}
+                                    value={selectedBudgetId || ""}
+                                    onChange={(e) => setSelectedBudgetId(Number(e.target.value))}
+                                >
+                                    {budgets.map(b => (
+                                        <option key={b.id} value={b.id} style={{ color: '#000' }}>
+                                            {b.name || b.budgetName || `Budżet #${b.id}`}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <Image
+                                    src="/arrow-down.svg"
+                                    alt=""
+                                    width={14}
+                                    height={14}
+                                    className={styles.budgetArrow}
+                                />
+                            </div>
                         </div>
                     )}
                 </div>
+
 
                 <nav className={styles.nav}>
                     <Link href="/tips" className={styles.navLink}>
