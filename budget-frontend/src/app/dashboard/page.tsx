@@ -276,6 +276,19 @@ function DashboardPage() {
                                             {b.name || b.budgetName || `Budżet #${b.id}`}
                                         </button>
                                     ))}
+
+                                    <div className={styles.profileDropdownDivider} />
+
+                                    <button
+                                        type="button"
+                                        className={styles.budgetDropdownItem}
+                                        onClick={() => {
+                                            setIsBudgetMenuOpen(false);
+                                            handleOpenCreateModal();
+                                        }}
+                                    >
+                                        Dodaj nowy budżet
+                                    </button>
                                 </div>
                             )}
                         </div>
