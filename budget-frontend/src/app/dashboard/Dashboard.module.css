@@ -29,14 +29,9 @@
     color: #F9FAFB;
 }
 
-.budgetSelectWrapper {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-}
-
 
 .budgetSelector {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -48,9 +43,11 @@
 }
 
 .budgetButton {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     min-width: 300px;
     padding: 8px 40px 8px 14px;
     border-radius: 10px;
@@ -67,15 +64,65 @@
     }
 
 
+    .budgetButton:focus,
+    .budgetButton:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
+
+.budgetButtonText {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .budgetArrow {
     position: absolute;
     right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
     pointer-events: none;
-    opacity: 0.8;
-    width: 25px;
+    opacity: 0.85;
+    width: 16px;
+    height: 16px;
+}
+.budgetDropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    min-width: 300px;
+    background: #1F2433;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    padding: 10px;
+    z-index: 60;
 }
 
+.budgetDropdownItem {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: var(--font-afacad);
+    color: #F9FAFB;
+    transition: 0.15s ease;
+}
 
+    .budgetDropdownItem:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .budgetDropdownItem:focus,
+    .budgetDropdownItem:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
 .nav {
     display: flex;
     align-items: center;

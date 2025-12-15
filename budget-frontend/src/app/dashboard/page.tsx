@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent, useRef } from "react";
 import styles from "./Dashboard.module.css";
 import CategoryChart from "./charts/CategoryChart";
 import UserBarChart from "./charts/UserBarChart";
@@ -40,6 +40,9 @@ function DashboardPage() {
     const [isCreating, setIsCreating] = useState(false);
 
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+
+    const [isBudgetMenuOpen, setIsBudgetMenuOpen] = useState(false);
+    const budgetMenuRef = useRef<HTMLDivElement | null>(null);
 
     const currentBudget = budgets.find(b => b.id === selectedBudgetId);
 
@@ -143,6 +146,20 @@ function DashboardPage() {
 
         fetchStats();
     }, [selectedYear, selectedMonth, selectedBudgetId]);
+
+    useEffect(() => {
+        const onMouseDown = (e: MouseEvent) => {
+            if (!isBudgetMenuOpen) return;
+            if (!budgetMenuRef.current) return;
+            if (!budgetMenuRef.current.contains(e.target as Node)) {
+                setIsBudgetMenuOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", onMouseDown);
+        return () => document.removeEventListener("mousedown", onMouseDown);
+    }, [isBudgetMenuOpen]);
+
     const { totalIncome, totalExpenses } = rawData.reduce(
         (acc, curr) => {
             const amount = Number(curr.amount) || 0;
@@ -226,20 +243,15 @@ function DashboardPage() {
                 <div className={styles.headerLeft}>
                     <img src="/logo.svg" alt="Logo aplikacji" className={styles.logoImage} />
                     {hasBudgets && (
-                        <div className={styles.budgetSelector}>
-                            <div className={styles.budgetSelectWrapper}>
-                                <select
-                                    className={styles.budgetButton}
-                                    value={selectedBudgetId || ""}
-                                    onChange={(e) => setSelectedBudgetId(Number(e.target.value))}
-                                >
-                                    {budgets.map(b => (
-                                        <option key={b.id} value={b.id} style={{ color: '#000' }}>
-                                            {b.name || b.budgetName || `Budżet #${b.id}`}
-                                        </option>
-                                    ))}
-                                </select>
-
+                        <div className={styles.budgetSelector} ref={budgetMenuRef}>
+                            <button
+                                type="button"
+                                className={styles.budgetButton}
+                                onClick={() => setIsBudgetMenuOpen(!isBudgetMenuOpen)}
+                            >
+                                <span className={styles.budgetButtonText}>
+                                    {currentBudget?.name || currentBudget?.budgetName || (selectedBudgetId ? `Budżet #${selectedBudgetId}` : "")}
+                                </span>
                                 <Image
                                     src="/arrow-down.svg"
                                     alt=""
@@ -247,11 +259,28 @@ function DashboardPage() {
                                     height={14}
                                     className={styles.budgetArrow}
                                 />
-                            </div>
+                            </button>
+
+                            {isBudgetMenuOpen && (
+                                <div className={styles.budgetDropdown}>
+                                    {budgets.map(b => (
+                                        <button
+                                            key={b.id}
+                                            type="button"
+                                            className={styles.budgetDropdownItem}
+                                            onClick={() => {
+                                                setSelectedBudgetId(b.id);
+                                                setIsBudgetMenuOpen(false);
+                                            }}
+                                        >
+                                            {b.name || b.budgetName || `Budżet #${b.id}`}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
-
 
                 <nav className={styles.nav}>
                     <Link href="/tips" className={styles.navLink}>
