@@ -29,7 +29,9 @@
     color: #F9FAFB;
 }
 
+
 .budgetSelector {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -41,16 +43,18 @@
 }
 
 .budgetButton {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
     min-width: 300px;
-    padding: 8px 14px;
+    padding: 8px 40px 8px 14px;
     border-radius: 10px;
     background: #494F60;
     color: #F9FAFB;
-    font-size: 13px;
+    font-size: 18px;
+    font-family: var(--font-afacad);
     cursor: pointer;
     border: 1px solid transparent;
 }
@@ -59,11 +63,59 @@
         border-color: #EAC278;
     }
 
+
+    .budgetButton:focus,
+    .budgetButton:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
+
 .budgetArrow {
-    font-size: 10px;
-    color: #C9CCD6;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    opacity: 0.85;
+    width: 16px;
+    height: 16px;
+}
+.budgetDropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    min-width: 300px;
+    background: #1F2433;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    padding: 10px;
+    z-index: 60;
 }
 
+.budgetDropdownItem {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: var(--font-afacad);
+    color: #F9FAFB;
+    transition: 0.15s ease;
+}
+
+    .budgetDropdownItem:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .budgetDropdownItem:focus,
+    .budgetDropdownItem:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
 .nav {
     display: flex;
     align-items: center;
@@ -71,15 +123,16 @@
 }
 
 .navLink {
-    text-decoration: none; 
+    text-decoration: none;
     border: none;
     background: transparent;
     color: #C9CCD6;
-    font-size: 12px;
+    font-size: 16px;
     cursor: pointer;
     padding: 6px 8px;
     display: inline-block;
     transition: color 0.2s;
+    font-family: var(--font-afacad);
 }
 
     .navLink:hover {
@@ -142,7 +195,10 @@
     flex-direction: column;
     justify-content: space-between;
     box-shadow: 0 10px 24px rgba(10, 12, 20, 0.45);
+    text-align: center;
+    align-items: center;
 }
+
 
 .cardHeader {
     margin-bottom: 6px;
@@ -172,11 +228,12 @@
 .cardValueNumber {
     font-size: 26px;
     font-weight: 600;
+    padding-right: 10px;
 }
 
 .cardValueCurrency {
     font-size: 30px;
-    color: #EAC278;
+    color: white;
 }
 
 .cardActions {
@@ -660,3 +717,76 @@
     height: 1px;
     background: #FFFFFF;
 }
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.profileMenu {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.profileButton {
+    background: transparent;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+
+
+.profileDropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 220px;
+    background: #1F2433;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    padding: 10px;
+    z-index: 60;
+}
+
+.profileDropdownItem,
+.profileDropdownItemDanger {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.15s ease;
+    font-family: var(--font-afacad);
+}
+
+.profileDropdownItem {
+    color: #F9FAFB;
+}
+
+    .profileDropdownItem:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+.profileDropdownDivider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.10);
+    margin: 8px 4px;
+}
+
+.profileDropdownItemDanger {
+    color: #FCA5A5;
+}
+
+    .profileDropdownItemDanger:hover {
+        background: rgba(239, 68, 68, 0.14);
+    }

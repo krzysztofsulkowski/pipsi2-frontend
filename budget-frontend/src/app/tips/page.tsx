@@ -4,10 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import styles from "./AboutUs.module.css";
+import styles from "./Tips.module.css";
 import dashboardStyles from "../dashboard/Dashboard.module.css";
 
-export default function AboutUs() {
+export default function TipsPage() {
     const router = useRouter();
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
@@ -49,7 +49,12 @@ export default function AboutUs() {
                             className={dashboardStyles.profileButton}
                             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                         >
-                            <Image src="/profile-icon.svg" alt="Profil" width={22} height={22} />
+                            <Image
+                                src="/profile-icon.svg"
+                                alt="Profil"
+                                width={22}
+                                height={22}
+                            />
                         </button>
 
                         {isProfileMenuOpen && (
@@ -85,40 +90,18 @@ export default function AboutUs() {
                 </nav>
             </header>
 
-            <main className={dashboardStyles.main}>
-                <section className={dashboardStyles.greeting}>
-                    <h1 className={dashboardStyles.greetingTitle}>O nas</h1>
+            <main className={styles.container}>
+                <div className={styles.header}>
+                    <h1 className={dashboardStyles.greetingTitle}>
+                        <span className={dashboardStyles.greetingHighlight}>
+                            Porady
+                        </span>{" "}
+                        finansowe
+                    </h1>
                     <div className={dashboardStyles.greetingUnderline} />
-                </section>
-
-                <div className={styles.contentWrapper}>
-                    <section className={styles.textColumn}>
-                        <div className={styles.descriptions}>
-                            <p className={styles.textRegular}>
-                                Jesteśmy zespołem studentów, którzy stworzyli aplikację do zarządzania
-                                budżetem, aby pomóc użytkownikom lepiej kontrolować swoje finanse.
-                                Nasz system umożliwia monitorowanie wydatków, tworzenie budżetów
-                                i analizowanie danych w czytelnej formie.
-                            </p>
-                            <p className={styles.textHighlight}>
-                                Wierzymy, że nawet proste narzędzia mogą realnie wspierać codzienne
-                                decyzje finansowe i ułatwiać planowanie przyszłości.
-                            </p>
-                        </div>
-                    </section>
-
-                    <section className={styles.imageColumn}>
-                        <div className={styles.imageBox}>
-                            <Image
-                                src="/wallet.svg"
-                                alt="Portfel"
-                                fill
-                                style={{ objectFit: "contain" }}
-                                priority
-                            />
-                        </div>
-                    </section>
                 </div>
+
+                <section className={styles.contentWrapper}></section>
             </main>
         </div>
     );
