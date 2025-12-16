@@ -70,13 +70,6 @@
         box-shadow: none;
     }
 
-.budgetButtonText {
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .budgetArrow {
     position: absolute;
     right: 14px;
@@ -202,7 +195,10 @@
     flex-direction: column;
     justify-content: space-between;
     box-shadow: 0 10px 24px rgba(10, 12, 20, 0.45);
+    text-align: center;
+    align-items: center;
 }
+
 
 .cardHeader {
     margin-bottom: 6px;
@@ -232,6 +228,7 @@
 .cardValueNumber {
     font-size: 26px;
     font-weight: 600;
+    padding-right: 10px;
 }
 
 .cardValueCurrency {

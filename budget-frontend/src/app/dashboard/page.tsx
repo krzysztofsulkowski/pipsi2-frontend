@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, FormEvent, useRef } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./Dashboard.module.css";
 import CategoryChart from "./charts/CategoryChart";
 import UserBarChart from "./charts/UserBarChart";
@@ -18,6 +19,8 @@ interface UserResponse {
 type ApiResponse = Budget[] | { data: Budget[] };
 
 function DashboardPage() {
+    const router = useRouter();
+
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
 
@@ -237,6 +240,12 @@ function DashboardPage() {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem("authToken");
+        setIsProfileMenuOpen(false);
+        router.push("/login");
+    };
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -345,7 +354,7 @@ function DashboardPage() {
                                 <button
                                     type="button"
                                     className={styles.profileDropdownItemDanger}
-                                    onClick={() => setIsProfileMenuOpen(false)}
+                                    onClick={handleLogout}
                                 >
                                     Wyloguj się
                                 </button>
@@ -537,7 +546,7 @@ function DashboardPage() {
                                         <span
                                             className={styles.cardValueNumber}
                                             style={{
-                                                color: currentBalance < 0 ? '#EF4444' : '#10B981'
+                                                color: currentBalance < 0 ? '#DD7D7D' : '#8CC279'
                                             }}
                                         >
                                             {loading ? "--,--" : currentBalance.toFixed(2)}
@@ -587,7 +596,7 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                            style={{ color: '#10B981' }}
+                                                    style={{ color: '#8CC279' }}
                                         >
                                             {loading ? "--,--" : totalIncome.toFixed(2)}
                                         </span>
@@ -615,7 +624,7 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                            style={{ color: '#EF4444' }}
+                                                    style={{ color: '#DD7D7D' }}
                                         >
                                             {loading ? "--,--" : totalExpenses.toFixed(2)}
                                         </span>
@@ -754,8 +763,10 @@ function DashboardPage() {
                                 wskazówki i proste sposoby na mądre
                                 planowanie wydatków.
                             </p>
-                            <button className={styles.footerButton}>
-                                poznaj porady od BALANCR
+                                    <button className={styles.footerButton}>
+                                        <Link href="/tips" className={styles.navLink}>
+                                            poznaj porady od BALANCR
+                                </Link>
                             </button>
                         </section>
                     </>
