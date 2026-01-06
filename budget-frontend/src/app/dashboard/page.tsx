@@ -938,7 +938,7 @@ function DashboardPage() {
                                             </>
                                         ) : (
                                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                                                {rawData.slice(0, 5).map((t, idx) => (
+                                                {rawData.slice(-5).reverse().map((t, idx) => (
                                                     <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "4px" }}>
                                                         <div style={{ display: "flex", flexDirection: "column" }}>
                                                             <span style={{ color: "white", fontSize: "13px" }}>{(t as any).title || (t as any).categoryName}</span>
