@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, FormEvent, useRef } from "react";
+import { useEffect, useState, FormEvent, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./Dashboard.module.css";
 import CategoryChart from "./charts/CategoryChart";
@@ -213,6 +213,29 @@ function DashboardPage() {
 
     const hasBudgets = budgets.length > 0;
     const expenseOnlyData = rawData.filter(t => t.type === 1);
+    const recentTransactions = useMemo(() => {
+        const toTime = (d: any) => {
+            const t = d ? new Date(d).getTime() : 0;
+            return Number.isFinite(t) ? t : 0;
+        };
+
+        return [...rawData]
+            .sort((a: any, b: any) => toTime(b.date) - toTime(a.date))
+            .slice(0, 7);
+    }, [rawData]);
+
+    const formatDatePL = (d: any) => {
+        if (!d) return "-";
+        const dt = new Date(d);
+        if (Number.isNaN(dt.getTime())) return "-";
+        return dt.toLocaleDateString("pl-PL");
+    };
+
+    const formatAmountPL = (amount: any) => {
+        const n = Number(amount);
+        const val = Number.isFinite(n) ? Math.abs(n) : 0;
+        return val.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
 
 
     const handleOpenCreateModal = () => {
@@ -924,55 +947,60 @@ function DashboardPage() {
                             </div>
 
                             <aside className={styles.sidePanel}>
-                                <div className={styles.historyCard}>
-                                    <div className={styles.historyHeader}>
-                                        <p className={styles.cardTitle}>
-                                            Historia transakcji
-                                        </p>
-                                    </div>
-                                    <div className={styles.historyBody}>
-                                        {rawData.length === 0 ? (
-                                            <>
-                                                <p className={styles.historyEmptyTitle}>Brak danych.</p>
-                                                <p className={styles.historyEmptyText}>Dodaj pierwsze transakcje.</p>
-                                            </>
-                                        ) : (
-                                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                                                {rawData.slice(-5).reverse().map((t, idx) => (
-                                                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "4px" }}>
-                                                        <div style={{ display: "flex", flexDirection: "column" }}>
-                                                            <span style={{ color: "white", fontSize: "13px" }}>{(t as any).title || (t as any).categoryName}</span>
-                                                            <span style={{ color: "#9CA3AF", fontSize: "11px" }}>{(t as any).userName}</span>
-                                                        </div>
-                                                        <span style={{ color: "#EAC278", fontWeight: "600" }}>
-                                                            {((t as any).type === 1 ? "-" : "")}{Number((t as any).amount).toFixed(2)} zł
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                                <Link
-                                                    href="/transactions"
-                                                    className={styles.historyButton}
-                                                >
-                                                    <div className={styles.historyIcon}>
-                                                        <Image
-                                                            src="/history-icon.svg"
-                                                            alt="Ikona historii"
-                                                            width={51}
-                                                            height={51}
-                                                        />
-                                                    </div>
-                                                    <span
-                                                        className={
-                                                            styles.historyButtonText
-                                                        }
-                                                    >
-                                                        ZOBACZ PEŁNĄ HISTORIĘ
-                                                    </span>
-                                                </Link>
+                                        <div className={styles.historyCard}>
+                                            <div className={styles.historyHeader}>
+                                                <p className={styles.historyTitle}>historia transakcji</p>
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
+
+                                            <div className={styles.historyBody}>
+                                                {rawData.length === 0 ? (
+                                                    <>
+                                                        <p className={styles.historyEmptyTitle}>Brak danych.</p>
+                                                        <p className={styles.historyEmptyText}>Dodaj pierwsze transakcje.</p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className={styles.historyTable}>
+                                                            {recentTransactions.map((t: any, idx: number) => {
+                                                                const label =
+                                                                    t.type === 0
+                                                                        ? "Przychód"
+                                                                        : `Wydatek: ${t.categoryName ?? "-"}`;
+
+                                                                return (
+                                                                    <div key={t.id ?? idx} className={styles.historyRow}>
+                                                                        <span className={styles.historyLabel}>{label}</span>
+
+                                                                        <span className={styles.historyAmount}>
+                                                                            {(t.type === 1 ? "-" : "")}{formatAmountPL(t.amount)} {currencySymbol}
+                                                                        </span>
+
+                                                                        <span className={styles.historyDate}>
+                                                                            {formatDatePL(t.date)}
+                                                                        </span>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+
+                                                        <Link href="/transactions" className={styles.historyButton}>
+                                                            <div className={styles.historyIcon}>
+                                                                <Image
+                                                                    src="/history-icon.svg"
+                                                                    alt="Ikona historii"
+                                                                    width={40}
+                                                                    height={40}
+                                                                />
+                                                            </div>
+                                                            <span className={styles.historyButtonText}>
+                                                                ZOBACZ PEŁNĄ HISTORIĘ
+                                                            </span>
+                                                        </Link>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+
 
                                 <div className={styles.fabList}>
                                     <button className={styles.fabItem}>
