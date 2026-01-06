@@ -847,18 +847,15 @@ function DashboardPage() {
                                             Oszczędności
                                         </p>
                                     </div>
-                                    <div className={styles.cardValue}>
-                                        <span
-                                            className={styles.cardValueNumber}
-                                        >
-                                            --,--
-                                        </span>
-                                        <span
-                                            className={styles.cardValueCurrency}
-                                        >
-                                            {currencySymbol}
-                                        </span>
-                                    </div>
+                                <div className={styles.cardValue}>
+                                    <span className={styles.cardValueNumber}>
+                                        {loading ? "--,--" : "0.00"}
+                                    </span>
+                                    <span className={styles.cardValueCurrency}>
+                                        {currencySymbol}
+                                    </span>
+                                </div>
+
                                     <p className={styles.cardDescription}>
                                         tyle udało Ci się zaoszczędzić z
                                         poprzednich miesięcy
