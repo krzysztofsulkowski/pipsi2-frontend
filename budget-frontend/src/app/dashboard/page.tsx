@@ -47,6 +47,12 @@ function DashboardPage() {
     const [isBudgetMenuOpen, setIsBudgetMenuOpen] = useState(false);
     const budgetMenuRef = useRef<HTMLDivElement | null>(null);
 
+    const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+    const [incomeDescription, setIncomeDescription] = useState("");
+    const [incomeAmount, setIncomeAmount] = useState("");
+    const [isAddingIncome, setIsAddingIncome] = useState(false);
+    const [incomeErrors, setIncomeErrors] = useState<{ description?: string; amount?: string }>({});
+
     const currentBudget = budgets.find(b => b.id === selectedBudgetId);
 
     const refreshBudgetsList = async () => {
@@ -246,6 +252,138 @@ function DashboardPage() {
         router.push("/login");
     };
 
+    const openIncomeModal = () => {
+        setIncomeErrors({});
+        setIncomeDescription("");
+        setIncomeAmount("");
+        setIsIncomeModalOpen(true);
+    };
+
+    const closeIncomeModal = () => {
+        if (isAddingIncome) return;
+        setIsIncomeModalOpen(false);
+    };
+
+    const isValidMoneyInput = (value: string) => {
+        if (!value.trim()) return true;
+        return /^\d+([.,]\d{0,2})?$/.test(value.trim());
+    };
+
+    const normalizeMoney = (value: string) => {
+        const trimmed = value.trim().replace(",", ".");
+        if (!trimmed) return "";
+        if (!/^\d+(\.\d{0,2})?$/.test(trimmed)) return null;
+
+        const [intPart, fracPart] = trimmed.split(".");
+        const frac = (fracPart ?? "").padEnd(2, "0").slice(0, 2);
+        return `${intPart}.${frac}`;
+    };
+
+    const handleIncomeAmountBlur = () => {
+        if (!incomeAmount.trim()) return;
+
+        const normalized = normalizeMoney(incomeAmount);
+        if (normalized === null) return;
+
+        setIncomeAmount(normalized.replace(".", ","));
+    };
+
+    const handleAddIncome = async (event: FormEvent) => {
+        event.preventDefault();
+        if (!selectedBudgetId) return;
+
+        const errors: { description?: string; amount?: string } = {};
+
+        if (!incomeDescription.trim()) {
+            errors.description = "To pole jest wymagane.";
+        }
+
+        if (!incomeAmount.trim()) {
+            errors.amount = "To pole jest wymagane.";
+        } else if (!isValidMoneyInput(incomeAmount)) {
+            errors.amount = "Wprowadź prawidłową kwotę.";
+        } else {
+            const normalized = normalizeMoney(incomeAmount);
+            if (normalized === null) {
+                errors.amount = "Wprowadź prawidłową kwotę.";
+            } else if (Number(normalized) < 0.01) {
+                errors.amount = "Wprowadź prawidłową kwotę.";
+            }
+        }
+
+        setIncomeErrors(errors);
+        if (Object.keys(errors).length > 0) return;
+
+        const normalizedAmount = normalizeMoney(incomeAmount);
+        if (normalizedAmount === null) return;
+
+        setIsAddingIncome(true);
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+            const token = localStorage.getItem("authToken");
+
+            if (!token) {
+                setIncomeErrors({ amount: "Nie jesteś zalogowany." });
+                return;
+            }
+
+            const body = {
+                description: incomeDescription.trim(),
+                amount: Number(normalizedAmount),
+                date: new Date().toISOString()
+            };
+
+            const res = await fetch(`${apiUrl}/api/budget/${selectedBudgetId}/income`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                let msg = "Nie udało się dodać przychodu.";
+                try {
+                    const data = await res.json();
+                    const modelErrors = data?.errors?.Model;
+                    if (Array.isArray(modelErrors) && modelErrors.length > 0) {
+                        msg = modelErrors[0];
+                    }
+                } catch { }
+
+                setIncomeErrors({ amount: msg });
+                return;
+            }
+
+            setIsIncomeModalOpen(false);
+
+            setLoading(true);
+            try {
+                const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}&budgetId=${selectedBudgetId}`;
+                const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
+                const statsRes = await fetch(url, { headers });
+
+                if (statsRes.ok) {
+                    const data = await statsRes.json();
+                    setRawData(Array.isArray(data) ? data : []);
+                } else {
+                    if (statsRes.status === 401) setBudgets([]);
+                }
+            } catch (e) {
+                console.error("Błąd pobierania statystyk po dodaniu przychodu", e);
+            } finally {
+                setLoading(false);
+            }
+        } catch (e) {
+            console.error("Błąd dodawania przychodu", e);
+            setIncomeErrors({ amount: "Wystąpił błąd podczas dodawania przychodu." });
+        } finally {
+            setIsAddingIncome(false);
+        }
+    };
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -382,7 +520,6 @@ function DashboardPage() {
                                     </span>
                                     !
                                 </h1>
-                                <div className={styles.greetingUnderline} />
 
                                 <p className={styles.emptySubtitle}>
                                     Twoja finansowa{" "}
@@ -531,7 +668,6 @@ function DashboardPage() {
                                 </div>
                             </div>
 
-                            <div className={styles.greetingUnderline} />
                         </section>
 
                         <section className={styles.topRow}>
@@ -596,7 +732,7 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                                    style={{ color: '#8CC279' }}
+                                            style={{ color: '#8CC279' }}
                                         >
                                             {loading ? "--,--" : totalIncome.toFixed(2)}
                                         </span>
@@ -609,6 +745,8 @@ function DashboardPage() {
                                     <div className={styles.cardActions}>
                                         <button
                                             className={styles.primaryButton}
+                                            onClick={openIncomeModal}
+                                            disabled={!selectedBudgetId}
                                         >
                                             Dodaj przychód
                                         </button>
@@ -624,7 +762,7 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                                    style={{ color: '#DD7D7D' }}
+                                            style={{ color: '#DD7D7D' }}
                                         >
                                             {loading ? "--,--" : totalExpenses.toFixed(2)}
                                         </span>
@@ -658,7 +796,6 @@ function DashboardPage() {
                                                 <p className={styles.historyEmptyText}>Dodaj pierwsze transakcje.</p>
                                             </>
                                         ) : (
-                                            /*5 ostatnich transakcji */
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                                 {rawData.slice(0, 5).map((t, idx) => (
                                                     <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
@@ -763,9 +900,9 @@ function DashboardPage() {
                                 wskazówki i proste sposoby na mądre
                                 planowanie wydatków.
                             </p>
-                                    <button className={styles.footerButton}>
-                                        <Link href="/tips" className={styles.navLink}>
-                                            poznaj porady od BALANCR
+                            <button className={styles.footerButton}>
+                                <Link href="/tips" className={styles.navLink}>
+                                    poznaj porady od BALANCR
                                 </Link>
                             </button>
                         </section>
@@ -821,6 +958,89 @@ function DashboardPage() {
                                     {isCreating
                                         ? "Zapisywanie..."
                                         : "Utwórz budżet"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isIncomeModalOpen && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modal}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
+                            <h2 className={styles.modalTitle}>Dodaj przychód</h2>
+                            <button
+                                type="button"
+                                onClick={closeIncomeModal}
+                                disabled={isAddingIncome}
+                                style={{
+                                    background: "transparent",
+                                    border: "none",
+                                    color: "white",
+                                    fontSize: "18px",
+                                    cursor: "pointer",
+                                    lineHeight: 1
+                                }}
+                                aria-label="Zamknij modal"
+                            >
+                                X
+                            </button>
+                        </div>
+
+                        <form className={styles.modalForm} onSubmit={handleAddIncome}>
+                            <div className={styles.modalField}>
+                                <label className={styles.modalLabel}>Opis przychodu</label>
+                                <input
+                                    className={styles.modalInput}
+                                    type="text"
+                                    value={incomeDescription}
+                                    onChange={(e) => {
+                                        setIncomeDescription(e.target.value);
+                                        if (incomeErrors.description) setIncomeErrors(prev => ({ ...prev, description: undefined }));
+                                    }}
+                                    placeholder='Np. "premia", "zwrot za zakupy"'
+                                    maxLength={200}
+                                />
+                                {incomeErrors.description && (
+                                    <p className={styles.modalError}>{incomeErrors.description}</p>
+                                )}
+                            </div>
+
+                            <div className={styles.modalField}>
+                                <label className={styles.modalLabel}>Kwota</label>
+                                <input
+                                    className={styles.modalInput}
+                                    inputMode="decimal"
+                                    type="text"
+                                    value={incomeAmount}
+                                    onChange={(e) => {
+                                        setIncomeAmount(e.target.value);
+                                        if (incomeErrors.amount) setIncomeErrors(prev => ({ ...prev, amount: undefined }));
+                                    }}
+                                    onBlur={handleIncomeAmountBlur}
+                                    placeholder={`0,00 ${currencySymbol}`}
+                                />
+                                {incomeErrors.amount && (
+                                    <p className={styles.modalError}>{incomeErrors.amount}</p>
+                                )}
+                            </div>
+
+                            <div className={styles.modalActions}>
+                                <button
+                                    type="button"
+                                    className={styles.modalSecondaryButton}
+                                    onClick={closeIncomeModal}
+                                    disabled={isAddingIncome}
+                                >
+                                    Anuluj
+                                </button>
+                                <button
+                                    type="submit"
+                                    className={styles.modalPrimaryButton}
+                                    disabled={isAddingIncome}
+                                >
+                                    {isAddingIncome ? "Dodawanie..." : "Dodaj przychód"}
                                 </button>
                             </div>
                         </form>
