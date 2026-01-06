@@ -212,6 +212,8 @@ function DashboardPage() {
     const currentBalance = totalIncome - totalExpenses;
 
     const hasBudgets = budgets.length > 0;
+    const expenseOnlyData = rawData.filter(t => t.type === 1);
+
 
     const handleOpenCreateModal = () => {
         setCreateError(null);
@@ -945,7 +947,9 @@ function DashboardPage() {
                                                             <span style={{ color: "white", fontSize: "13px" }}>{(t as any).title || (t as any).categoryName}</span>
                                                             <span style={{ color: "#9CA3AF", fontSize: "11px" }}>{(t as any).userName}</span>
                                                         </div>
-                                                        <span style={{ color: "#EAC278", fontWeight: "600" }}>{Number((t as any).amount).toFixed(2)} zł</span>
+                                                        <span style={{ color: "#EAC278", fontWeight: "600" }}>
+                                                            {((t as any).type === 1 ? "-" : "")}{Number((t as any).amount).toFixed(2)} zł
+                                                        </span>
                                                     </div>
                                                 ))}
                                                 <Link
@@ -1009,7 +1013,7 @@ function DashboardPage() {
                                             Ładowanie danych...
                                         </p>
                                     ) : (
-                                        <CategoryChart data={rawData} />
+                                    <CategoryChart data={expenseOnlyData} />
                                     )}
                                 </div>
                             </div>
@@ -1029,7 +1033,7 @@ function DashboardPage() {
                                             Ładowanie danych...
                                         </p>
                                     ) : (
-                                        <UserBarChart data={rawData} />
+                                    <UserBarChart data={expenseOnlyData} />
                                     )}
                                 </div>
                             </div>
