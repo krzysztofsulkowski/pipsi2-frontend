@@ -18,6 +18,21 @@ interface UserResponse {
 
 type ApiResponse = Budget[] | { data: Budget[] };
 
+interface CategoryDto {
+    id: number;
+    name: string;
+}
+
+interface PaymentMethodDto {
+    value: number;
+    name: string;
+}
+
+interface FrequencyDto {
+    value: number;
+    name: string;
+}
+
 function DashboardPage() {
     const router = useRouter();
 
@@ -47,13 +62,31 @@ function DashboardPage() {
     const [isBudgetMenuOpen, setIsBudgetMenuOpen] = useState(false);
     const budgetMenuRef = useRef<HTMLDivElement | null>(null);
 
+    const currentBudget = budgets.find(b => b.id === selectedBudgetId);
+
     const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
     const [incomeDescription, setIncomeDescription] = useState("");
-    const [incomeAmount, setIncomeAmount] = useState("");
-    const [isAddingIncome, setIsAddingIncome] = useState(false);
-    const [incomeErrors, setIncomeErrors] = useState<{ description?: string; amount?: string }>({});
+    const [incomeAmountInput, setIncomeAmountInput] = useState("");
+    const [incomeErrors, setIncomeErrors] = useState<{ description?: string; amount?: string; form?: string }>({});
+    const [isIncomeSaving, setIsIncomeSaving] = useState(false);
 
-    const currentBudget = budgets.find(b => b.id === selectedBudgetId);
+    const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+    const [expenseCategories, setExpenseCategories] = useState<CategoryDto[]>([]);
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDto[]>([]);
+    const [frequencies, setFrequencies] = useState<FrequencyDto[]>([]);
+    const [dictionariesLoading, setDictionariesLoading] = useState(false);
+
+    const [expenseCategoryId, setExpenseCategoryId] = useState<string>("");
+    const [expenseDescription, setExpenseDescription] = useState("");
+    const [expensePaymentMethod, setExpensePaymentMethod] = useState<string>("");
+    const [expenseAmountInput, setExpenseAmountInput] = useState("");
+    const [expenseType, setExpenseType] = useState<"instant" | "recurring" | "planned">("instant");
+    const [expenseFrequency, setExpenseFrequency] = useState<string>("");
+    const [expenseStartDate, setExpenseStartDate] = useState<string>("");
+    const [expenseErrors, setExpenseErrors] = useState<Record<string, string>>({});
+    const [isExpenseSaving, setIsExpenseSaving] = useState(false);
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
     const refreshBudgetsList = async () => {
         setBudgetsLoading(true);
@@ -61,7 +94,6 @@ function DashboardPage() {
             const token = localStorage.getItem("authToken");
             if (!token) return;
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
             const res = await fetch(`${apiUrl}/api/budget/my-budgets`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -71,8 +103,8 @@ function DashboardPage() {
                 let budgetsArray: Budget[] = [];
                 if (Array.isArray(data)) {
                     budgetsArray = data;
-                } else if ('data' in data && Array.isArray(data.data)) {
-                    budgetsArray = data.data;
+                } else if ("data" in data && Array.isArray((data as any).data)) {
+                    budgetsArray = (data as any).data;
                 }
                 setBudgets(budgetsArray);
 
@@ -84,7 +116,6 @@ function DashboardPage() {
                 } else {
                     setLoading(false);
                 }
-
             } else {
                 setBudgets([]);
             }
@@ -96,11 +127,33 @@ function DashboardPage() {
         }
     };
 
+    const refreshStats = async (budgetId: number, year: number, month: number) => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("authToken");
+            const url = `${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`;
+
+            const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
+            const res = await fetch(url, { headers });
+
+            if (!res.ok) {
+                if (res.status === 401) setBudgets([]);
+                return;
+            }
+
+            const data = await res.json();
+            setRawData(Array.isArray(data) ? data : []);
+        } catch (e) {
+            console.error("Błąd pobierania statystyk", e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         const fetchInitialData = async () => {
             const token = localStorage.getItem("authToken");
             if (!token) return;
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
             const fetchUser = async () => {
                 try {
@@ -126,34 +179,8 @@ function DashboardPage() {
     }, []);
 
     useEffect(() => {
-        if (!selectedBudgetId) {
-            return;
-        }
-        const fetchStats = async () => {
-            setLoading(true);
-            try {
-                const token = localStorage.getItem("authToken");
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-                const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}&budgetId=${selectedBudgetId}`;
-
-                const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
-                const res = await fetch(url, { headers });
-
-                if (!res.ok) {
-                    if (res.status === 401)
-                        setBudgets([]);
-                    return;
-                }
-                const data = await res.json();
-                setRawData(Array.isArray(data) ? data : []);
-            } catch (e) {
-                console.error("Błąd pobierania statystyk", e);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchStats();
+        if (!selectedBudgetId) return;
+        refreshStats(selectedBudgetId, selectedYear, selectedMonth);
     }, [selectedYear, selectedMonth, selectedBudgetId]);
 
     useEffect(() => {
@@ -171,10 +198,10 @@ function DashboardPage() {
 
     const { totalIncome, totalExpenses } = rawData.reduce(
         (acc, curr) => {
-            const amount = Number(curr.amount) || 0;
-            if (curr.type === 0) {
+            const amount = Number((curr as any).amount) || 0;
+            if ((curr as any).type === 0) {
                 acc.totalIncome += amount;
-            } else if (curr.type === 1) { // Wydatek
+            } else if ((curr as any).type === 1) {
                 acc.totalExpenses += amount;
             }
             return acc;
@@ -208,10 +235,7 @@ function DashboardPage() {
         setIsCreating(true);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-
             const token = localStorage.getItem("authToken");
-
             if (!token) {
                 setCreateError("Nie jesteś zalogowany.");
                 setIsCreating(false);
@@ -252,85 +276,65 @@ function DashboardPage() {
         router.push("/login");
     };
 
-    const openIncomeModal = () => {
-        setIncomeErrors({});
+    const isValidMoneyInput = (value: string) => {
+        if (!value.trim()) return false;
+        const normalized = value.replace(",", ".");
+        return /^\d+(\.\d{0,2})?$/.test(normalized);
+    };
+
+    const normalizeMoneyToTwoDecimals = (value: string) => {
+        const normalized = value.replace(",", ".").trim();
+        if (!normalized) return "";
+        if (!/^\d+(\.\d{0,2})?$/.test(normalized)) return value;
+        const num = Number(normalized);
+        if (!Number.isFinite(num)) return value;
+        return num.toFixed(2);
+    };
+
+    const handleOpenIncomeModal = () => {
+        if (!selectedBudgetId) return;
         setIncomeDescription("");
-        setIncomeAmount("");
+        setIncomeAmountInput("");
+        setIncomeErrors({});
         setIsIncomeModalOpen(true);
     };
 
-    const closeIncomeModal = () => {
-        if (isAddingIncome) return;
+    const handleCloseIncomeModal = () => {
         setIsIncomeModalOpen(false);
     };
 
-    const isValidMoneyInput = (value: string) => {
-        if (!value.trim()) return true;
-        return /^\d+([.,]\d{0,2})?$/.test(value.trim());
-    };
-
-    const normalizeMoney = (value: string) => {
-        const trimmed = value.trim().replace(",", ".");
-        if (!trimmed) return "";
-        if (!/^\d+(\.\d{0,2})?$/.test(trimmed)) return null;
-
-        const [intPart, fracPart] = trimmed.split(".");
-        const frac = (fracPart ?? "").padEnd(2, "0").slice(0, 2);
-        return `${intPart}.${frac}`;
-    };
-
-    const handleIncomeAmountBlur = () => {
-        if (!incomeAmount.trim()) return;
-
-        const normalized = normalizeMoney(incomeAmount);
-        if (normalized === null) return;
-
-        setIncomeAmount(normalized.replace(".", ","));
-    };
-
-    const handleAddIncome = async (event: FormEvent) => {
-        event.preventDefault();
+    const handleSaveIncome = async (e: FormEvent) => {
+        e.preventDefault();
         if (!selectedBudgetId) return;
 
-        const errors: { description?: string; amount?: string } = {};
+        const nextErrors: { description?: string; amount?: string; form?: string } = {};
 
-        if (!incomeDescription.trim()) {
-            errors.description = "To pole jest wymagane.";
-        }
-
-        if (!incomeAmount.trim()) {
-            errors.amount = "To pole jest wymagane.";
-        } else if (!isValidMoneyInput(incomeAmount)) {
-            errors.amount = "Wprowadź prawidłową kwotę.";
+        if (!incomeDescription.trim()) nextErrors.description = "To pole jest wymagane.";
+        if (!incomeAmountInput.trim()) {
+            nextErrors.amount = "To pole jest wymagane.";
+        } else if (!isValidMoneyInput(incomeAmountInput)) {
+            nextErrors.amount = "Wprowadź prawidłową kwotę.";
         } else {
-            const normalized = normalizeMoney(incomeAmount);
-            if (normalized === null) {
-                errors.amount = "Wprowadź prawidłową kwotę.";
-            } else if (Number(normalized) < 0.01) {
-                errors.amount = "Wprowadź prawidłową kwotę.";
-            }
+            const num = Number(incomeAmountInput.replace(",", "."));
+            if (!Number.isFinite(num) || num <= 0) nextErrors.amount = "Wprowadź prawidłową kwotę.";
         }
 
-        setIncomeErrors(errors);
-        if (Object.keys(errors).length > 0) return;
+        setIncomeErrors(nextErrors);
+        if (Object.keys(nextErrors).length > 0) return;
 
-        const normalizedAmount = normalizeMoney(incomeAmount);
-        if (normalizedAmount === null) return;
-
-        setIsAddingIncome(true);
+        setIsIncomeSaving(true);
 
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
             const token = localStorage.getItem("authToken");
-
             if (!token) {
-                setIncomeErrors({ amount: "Nie jesteś zalogowany." });
+                setIncomeErrors({ form: "Nie jesteś zalogowany." });
                 return;
             }
 
+            const amount = Number(incomeAmountInput.replace(",", "."));
             const body = {
                 description: incomeDescription.trim(),
-                amount: Number(normalizedAmount),
+                amount,
                 date: new Date().toISOString()
             };
 
@@ -344,43 +348,179 @@ function DashboardPage() {
             });
 
             if (!res.ok) {
-                let msg = "Nie udało się dodać przychodu.";
-                try {
-                    const data = await res.json();
-                    const modelErrors = data?.errors?.Model;
-                    if (Array.isArray(modelErrors) && modelErrors.length > 0) {
-                        msg = modelErrors[0];
-                    }
-                } catch { }
-
-                setIncomeErrors({ amount: msg });
+                setIncomeErrors({ form: "Nie udało się dodać przychodu." });
                 return;
             }
 
             setIsIncomeModalOpen(false);
+            await refreshStats(selectedBudgetId, selectedYear, selectedMonth);
+        } catch (err) {
+            console.error("Błąd dodawania przychodu", err);
+            setIncomeErrors({ form: "Wystąpił błąd podczas dodawania przychodu." });
+        } finally {
+            setIsIncomeSaving(false);
+        }
+    };
 
-            setLoading(true);
-            try {
-                const url = `${apiUrl}/api/Reports/stats?year=${selectedYear}&month=${selectedMonth}&budgetId=${selectedBudgetId}`;
-                const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
-                const statsRes = await fetch(url, { headers });
+    const loadExpenseDictionaries = async () => {
+        setDictionariesLoading(true);
+        try {
+            const token = localStorage.getItem("authToken");
+            if (!token) return;
 
-                if (statsRes.ok) {
-                    const data = await statsRes.json();
-                    setRawData(Array.isArray(data) ? data : []);
-                } else {
-                    if (statsRes.status === 401) setBudgets([]);
-                }
-            } catch (e) {
-                console.error("Błąd pobierania statystyk po dodaniu przychodu", e);
-            } finally {
-                setLoading(false);
+            const [catRes, pmRes, frRes] = await Promise.all([
+                fetch(`${apiUrl}/api/categories`, { headers: { "Authorization": `Bearer ${token}` } }),
+                fetch(`${apiUrl}/api/dictionaries`, { headers: { "Authorization": `Bearer ${token}` } }),
+                fetch(`${apiUrl}/api/dictionaries/frequencies`, { headers: { "Authorization": `Bearer ${token}` } })
+            ]);
+
+            if (catRes.ok) {
+                const cats = await catRes.json();
+                setExpenseCategories(Array.isArray(cats) ? cats : []);
+            } else {
+                setExpenseCategories([]);
+            }
+
+            if (pmRes.ok) {
+                const pms = await pmRes.json();
+                setPaymentMethods(Array.isArray(pms) ? pms : []);
+            } else {
+                setPaymentMethods([]);
+            }
+
+            if (frRes.ok) {
+                const frs = await frRes.json();
+                setFrequencies(Array.isArray(frs) ? frs : []);
+            } else {
+                setFrequencies([]);
             }
         } catch (e) {
-            console.error("Błąd dodawania przychodu", e);
-            setIncomeErrors({ amount: "Wystąpił błąd podczas dodawania przychodu." });
+            console.error("Błąd pobierania słowników", e);
+            setExpenseCategories([]);
+            setPaymentMethods([]);
+            setFrequencies([]);
         } finally {
-            setIsAddingIncome(false);
+            setDictionariesLoading(false);
+        }
+    };
+
+    const handleOpenExpenseModal = async () => {
+        if (!selectedBudgetId) return;
+
+        setExpenseErrors({});
+        setExpenseCategoryId("");
+        setExpenseDescription("");
+        setExpensePaymentMethod("");
+        setExpenseAmountInput("");
+        setExpenseType("instant");
+        setExpenseFrequency("");
+        setExpenseStartDate("");
+
+        setIsExpenseModalOpen(true);
+        await loadExpenseDictionaries();
+    };
+
+    const handleCloseExpenseModal = () => {
+        setIsExpenseModalOpen(false);
+    };
+
+    const validateExpenseForm = () => {
+        const next: Record<string, string> = {};
+
+        if (!expenseCategoryId) next.categoryId = "To pole jest wymagane.";
+        if (!expenseDescription.trim()) next.description = "To pole jest wymagane.";
+        if (!expensePaymentMethod) next.paymentMethod = "To pole jest wymagane.";
+
+        if (!expenseAmountInput.trim()) {
+            next.amount = "To pole jest wymagane.";
+        } else if (!isValidMoneyInput(expenseAmountInput)) {
+            next.amount = "Wprowadź prawidłową kwotę.";
+        } else {
+            const num = Number(expenseAmountInput.replace(",", "."));
+            if (!Number.isFinite(num) || num <= 0) next.amount = "Wprowadź prawidłową kwotę.";
+        }
+
+        if (!expenseType) next.expenseType = "To pole jest wymagane.";
+
+        if (expenseType === "recurring") {
+            if (!expenseFrequency) next.frequency = "To pole jest wymagane.";
+            if (!expenseStartDate) next.startDate = "To pole jest wymagane.";
+        }
+
+        if (expenseType === "planned") {
+            if (!expenseStartDate) next.startDate = "To pole jest wymagane.";
+        }
+
+        return next;
+    };
+
+    const handleSaveExpense = async (e: FormEvent) => {
+        e.preventDefault();
+        if (!selectedBudgetId) return;
+
+        const nextErrors = validateExpenseForm();
+        setExpenseErrors(nextErrors);
+        if (Object.keys(nextErrors).length > 0) return;
+
+        setIsExpenseSaving(true);
+
+        try {
+            const token = localStorage.getItem("authToken");
+            if (!token) {
+                setExpenseErrors({ form: "Nie jesteś zalogowany." });
+                return;
+            }
+
+            const expenseTypeValue = expenseType === "instant" ? 0 : expenseType === "recurring" ? 1 : 2;
+
+            const body: any = {
+                categoryId: Number(expenseCategoryId),
+                description: expenseDescription.trim(),
+                paymentMethod: Number(expensePaymentMethod),
+                amount: Number(expenseAmountInput.replace(",", ".")),
+                expenseType: expenseTypeValue,
+                receiptImageUrl: null,
+                frequency: null,
+                startDate: null,
+                endDate: null
+            };
+
+            if (expenseType === "recurring") {
+                body.frequency = Number(expenseFrequency);
+                body.startDate = new Date(expenseStartDate).toISOString();
+            }
+
+            if (expenseType === "planned") {
+                body.startDate = new Date(expenseStartDate).toISOString();
+            }
+
+            const res = await fetch(`${apiUrl}/api/budget/${selectedBudgetId}/expenses`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                let message = "Nie udało się dodać wydatku.";
+                try {
+                    const err = await res.json();
+                    if (err?.detail && typeof err.detail === "string") message = err.detail;
+                } catch { }
+
+                setExpenseErrors({ form: message });
+                return;
+            }
+
+            setIsExpenseModalOpen(false);
+            await refreshStats(selectedBudgetId, selectedYear, selectedMonth);
+        } catch (err) {
+            console.error("Błąd dodawania wydatku", err);
+            setExpenseErrors({ form: "Wystąpił błąd podczas dodawania wydatku." });
+        } finally {
+            setIsExpenseSaving(false);
         }
     };
 
@@ -397,7 +537,7 @@ function DashboardPage() {
                                 onClick={() => setIsBudgetMenuOpen(!isBudgetMenuOpen)}
                             >
                                 <span className={styles.budgetButtonText}>
-                                    {currentBudget?.name || currentBudget?.budgetName || (selectedBudgetId ? `Budżet #${selectedBudgetId}` : "")}
+                                    {currentBudget?.name || (currentBudget as any)?.budgetName || (selectedBudgetId ? `Budżet #${selectedBudgetId}` : "")}
                                 </span>
                                 <Image
                                     src="/arrow-down.svg"
@@ -420,7 +560,7 @@ function DashboardPage() {
                                                 setIsBudgetMenuOpen(false);
                                             }}
                                         >
-                                            {b.name || b.budgetName || `Budżet #${b.id}`}
+                                            {b.name || (b as any).budgetName || `Budżet #${b.id}`}
                                         </button>
                                     ))}
 
@@ -682,7 +822,7 @@ function DashboardPage() {
                                         <span
                                             className={styles.cardValueNumber}
                                             style={{
-                                                color: currentBalance < 0 ? '#DD7D7D' : '#8CC279'
+                                                color: currentBalance < 0 ? "#DD7D7D" : "#8CC279"
                                             }}
                                         >
                                             {loading ? "--,--" : currentBalance.toFixed(2)}
@@ -732,7 +872,7 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                            style={{ color: '#8CC279' }}
+                                            style={{ color: "#8CC279" }}
                                         >
                                             {loading ? "--,--" : totalIncome.toFixed(2)}
                                         </span>
@@ -745,8 +885,8 @@ function DashboardPage() {
                                     <div className={styles.cardActions}>
                                         <button
                                             className={styles.primaryButton}
-                                            onClick={openIncomeModal}
-                                            disabled={!selectedBudgetId}
+                                            type="button"
+                                            onClick={handleOpenIncomeModal}
                                         >
                                             Dodaj przychód
                                         </button>
@@ -762,7 +902,7 @@ function DashboardPage() {
                                     <div className={styles.cardValue}>
                                         <span
                                             className={styles.cardValueNumber}
-                                            style={{ color: '#DD7D7D' }}
+                                            style={{ color: "#DD7D7D" }}
                                         >
                                             {loading ? "--,--" : totalExpenses.toFixed(2)}
                                         </span>
@@ -775,6 +915,8 @@ function DashboardPage() {
                                     <div className={styles.cardActions}>
                                         <button
                                             className={styles.secondaryButton}
+                                            type="button"
+                                            onClick={handleOpenExpenseModal}
                                         >
                                             Dodaj wydatek
                                         </button>
@@ -796,14 +938,14 @@ function DashboardPage() {
                                                 <p className={styles.historyEmptyText}>Dodaj pierwsze transakcje.</p>
                                             </>
                                         ) : (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                                 {rawData.slice(0, 5).map((t, idx) => (
-                                                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px' }}>
-                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                            <span style={{ color: 'white', fontSize: '13px' }}>{t.title || t.categoryName}</span>
-                                                            <span style={{ color: '#9CA3AF', fontSize: '11px' }}>{t.userName}</span>
+                                                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "4px" }}>
+                                                        <div style={{ display: "flex", flexDirection: "column" }}>
+                                                            <span style={{ color: "white", fontSize: "13px" }}>{(t as any).title || (t as any).categoryName}</span>
+                                                            <span style={{ color: "#9CA3AF", fontSize: "11px" }}>{(t as any).userName}</span>
                                                         </div>
-                                                        <span style={{ color: '#EAC278', fontWeight: '600' }}>{Number(t.amount).toFixed(2)} zł</span>
+                                                        <span style={{ color: "#EAC278", fontWeight: "600" }}>{Number((t as any).amount).toFixed(2)} zł</span>
                                                     </div>
                                                 ))}
                                                 <Link
@@ -968,79 +1110,251 @@ function DashboardPage() {
             {isIncomeModalOpen && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modal}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
+                        <div className={styles.modalHeaderRow}>
                             <h2 className={styles.modalTitle}>Dodaj przychód</h2>
-                            <button
-                                type="button"
-                                onClick={closeIncomeModal}
-                                disabled={isAddingIncome}
-                                style={{
-                                    background: "transparent",
-                                    border: "none",
-                                    color: "white",
-                                    fontSize: "18px",
-                                    cursor: "pointer",
-                                    lineHeight: 1
-                                }}
-                                aria-label="Zamknij modal"
-                            >
+                            <button type="button" className={styles.modalCloseButton} onClick={handleCloseIncomeModal}>
                                 X
                             </button>
                         </div>
 
-                        <form className={styles.modalForm} onSubmit={handleAddIncome}>
+                        <form className={styles.modalForm} onSubmit={handleSaveIncome}>
                             <div className={styles.modalField}>
                                 <label className={styles.modalLabel}>Opis przychodu</label>
                                 <input
                                     className={styles.modalInput}
                                     type="text"
                                     value={incomeDescription}
-                                    onChange={(e) => {
-                                        setIncomeDescription(e.target.value);
-                                        if (incomeErrors.description) setIncomeErrors(prev => ({ ...prev, description: undefined }));
-                                    }}
+                                    onChange={(e) => setIncomeDescription(e.target.value)}
                                     placeholder='Np. "premia", "zwrot za zakupy"'
-                                    maxLength={200}
                                 />
-                                {incomeErrors.description && (
-                                    <p className={styles.modalError}>{incomeErrors.description}</p>
-                                )}
+                                {incomeErrors.description && <p className={styles.fieldError}>{incomeErrors.description}</p>}
                             </div>
 
                             <div className={styles.modalField}>
-                                <label className={styles.modalLabel}>Kwota</label>
+                                <label className={styles.modalLabel}>Kwota ({currencySymbol})</label>
                                 <input
                                     className={styles.modalInput}
-                                    inputMode="decimal"
                                     type="text"
-                                    value={incomeAmount}
-                                    onChange={(e) => {
-                                        setIncomeAmount(e.target.value);
-                                        if (incomeErrors.amount) setIncomeErrors(prev => ({ ...prev, amount: undefined }));
-                                    }}
-                                    onBlur={handleIncomeAmountBlur}
-                                    placeholder={`0,00 ${currencySymbol}`}
+                                    inputMode="decimal"
+                                    value={incomeAmountInput}
+                                    onChange={(e) => setIncomeAmountInput(e.target.value)}
+                                    onBlur={() => setIncomeAmountInput(normalizeMoneyToTwoDecimals(incomeAmountInput))}
+                                    placeholder="0,00"
                                 />
-                                {incomeErrors.amount && (
-                                    <p className={styles.modalError}>{incomeErrors.amount}</p>
-                                )}
+                                {incomeErrors.amount && <p className={styles.fieldError}>{incomeErrors.amount}</p>}
                             </div>
+
+                            {incomeErrors.form && (
+                                <p className={styles.modalError}>
+                                    {incomeErrors.form}
+                                </p>
+                            )}
 
                             <div className={styles.modalActions}>
                                 <button
                                     type="button"
                                     className={styles.modalSecondaryButton}
-                                    onClick={closeIncomeModal}
-                                    disabled={isAddingIncome}
+                                    onClick={handleCloseIncomeModal}
+                                    disabled={isIncomeSaving}
                                 >
                                     Anuluj
                                 </button>
                                 <button
                                     type="submit"
                                     className={styles.modalPrimaryButton}
-                                    disabled={isAddingIncome}
+                                    disabled={isIncomeSaving}
                                 >
-                                    {isAddingIncome ? "Dodawanie..." : "Dodaj przychód"}
+                                    {isIncomeSaving ? "Zapisywanie..." : "Dodaj przychód"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {isExpenseModalOpen && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modal}>
+                        <div className={styles.modalHeaderRow}>
+                            <h2 className={styles.modalTitle}>Dodaj wydatek</h2>
+                            <button type="button" className={styles.modalCloseButton} onClick={handleCloseExpenseModal}>
+                                X
+                            </button>
+                        </div>
+
+                        <form className={styles.modalForm} onSubmit={handleSaveExpense}>
+                            <div className={styles.modalField}>
+                                <label className={styles.modalLabel}>Kategoria wydatku</label>
+                                <select
+                                    className={styles.modalSelect}
+                                    value={expenseCategoryId}
+                                    onChange={(e) => setExpenseCategoryId(e.target.value)}
+                                    disabled={dictionariesLoading}
+                                >
+                                    <option value="">Wybierz kategorię</option>
+                                    {expenseCategories.map(c => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {expenseErrors.categoryId && <p className={styles.fieldError}>{expenseErrors.categoryId}</p>}
+                            </div>
+
+                            <div className={styles.modalField}>
+                                <label className={styles.modalLabel}>Opis wydatku</label>
+                                <input
+                                    className={styles.modalInput}
+                                    type="text"
+                                    value={expenseDescription}
+                                    onChange={(e) => setExpenseDescription(e.target.value)}
+                                    placeholder='Np. "urodziny Ani", "kolacja w restauracji"'
+                                />
+                                {expenseErrors.description && <p className={styles.fieldError}>{expenseErrors.description}</p>}
+                            </div>
+
+                            <div className={styles.modalField}>
+                                <label className={styles.modalLabel}>Metoda płatności</label>
+                                <select
+                                    className={styles.modalSelect}
+                                    value={expensePaymentMethod}
+                                    onChange={(e) => setExpensePaymentMethod(e.target.value)}
+                                    disabled={dictionariesLoading}
+                                >
+                                    <option value="">Wybierz metodę</option>
+                                    {paymentMethods.map(pm => (
+                                        <option key={pm.value} value={pm.value}>
+                                            {pm.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {expenseErrors.paymentMethod && <p className={styles.fieldError}>{expenseErrors.paymentMethod}</p>}
+                            </div>
+
+                            <div className={styles.modalField}>
+                                <label className={styles.modalLabel}>Kwota ({currencySymbol})</label>
+                                <input
+                                    className={styles.modalInput}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={expenseAmountInput}
+                                    onChange={(e) => setExpenseAmountInput(e.target.value)}
+                                    onBlur={() => setExpenseAmountInput(normalizeMoneyToTwoDecimals(expenseAmountInput))}
+                                    placeholder="0,00"
+                                />
+                                {expenseErrors.amount && <p className={styles.fieldError}>{expenseErrors.amount}</p>}
+                            </div>
+
+                            <div className={styles.modalField}>
+                                <label className={styles.modalLabel}>Rodzaj wydatku</label>
+                                <div className={styles.radioRow}>
+                                    <label className={styles.radioOption}>
+                                        <input
+                                            type="radio"
+                                            name="expenseType"
+                                            checked={expenseType === "instant"}
+                                            onChange={() => setExpenseType("instant")}
+                                        />
+                                        <span>Płatność jednorazowa</span>
+                                    </label>
+
+                                    <label className={styles.radioOption}>
+                                        <input
+                                            type="radio"
+                                            name="expenseType"
+                                            checked={expenseType === "recurring"}
+                                            onChange={() => setExpenseType("recurring")}
+                                        />
+                                        <span>Płatność cykliczna</span>
+                                    </label>
+
+                                    <label className={styles.radioOption}>
+                                        <input
+                                            type="radio"
+                                            name="expenseType"
+                                            checked={expenseType === "planned"}
+                                            onChange={() => setExpenseType("planned")}
+                                        />
+                                        <span>Płatność planowana</span>
+                                    </label>
+                                </div>
+                                {expenseErrors.expenseType && <p className={styles.fieldError}>{expenseErrors.expenseType}</p>}
+                            </div>
+
+                            {expenseType === "recurring" && (
+                                <div className={styles.modalField}>
+                                    <label className={styles.modalLabel}>Częstotliwość</label>
+                                    <select
+                                        className={styles.modalSelect}
+                                        value={expenseFrequency}
+                                        onChange={(e) => setExpenseFrequency(e.target.value)}
+                                        disabled={dictionariesLoading}
+                                    >
+                                        <option value="">Wybierz częstotliwość</option>
+                                        {frequencies.map(f => (
+                                            <option key={f.value} value={f.value}>
+                                                {f.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {expenseErrors.frequency && <p className={styles.fieldError}>{expenseErrors.frequency}</p>}
+
+                                    <div style={{ height: "10px" }} />
+
+                                    <label className={styles.modalLabel}>Rozpoczyna się w dniu</label>
+                                    <input
+                                        className={styles.modalInput}
+                                        type="date"
+                                        value={expenseStartDate}
+                                        onChange={(e) => setExpenseStartDate(e.target.value)}
+                                    />
+                                    {expenseErrors.startDate && <p className={styles.fieldError}>{expenseErrors.startDate}</p>}
+
+                                    <p className={styles.modalHint}>
+                                        Płatność cykliczna będzie odliczana automatycznie, jeżeli Twój bilans będzie wynosił powyżej 0zł. Otrzymasz powiadomienie o zbliżającej się kolejnej płatności cyklicznej - w aplikacji i na skrzynkę e-mail.
+                                    </p>
+                                </div>
+                            )}
+
+                            {expenseType === "planned" && (
+                                <div className={styles.modalField}>
+                                    <label className={styles.modalLabel}>Data wykonania płatności</label>
+                                    <input
+                                        className={styles.modalInput}
+                                        type="date"
+                                        value={expenseStartDate}
+                                        onChange={(e) => setExpenseStartDate(e.target.value)}
+                                    />
+                                    {expenseErrors.startDate && <p className={styles.fieldError}>{expenseErrors.startDate}</p>}
+
+                                    <p className={styles.modalHint}>
+                                        Płatność zostanie odliczona automatycznie, jeżeli Twój bilans będzie wynosił powyżej 0zł. Otrzymasz powiadomienie o zbliżającej się płatności planowanej - w aplikacji i na skrzynkę e-mail.
+                                    </p>
+                                </div>
+                            )}
+
+
+                            {expenseErrors.form && (
+                                <p className={styles.modalError}>
+                                    {expenseErrors.form}
+                                </p>
+                            )}
+
+                            <div className={styles.modalActions}>
+                                <button
+                                    type="button"
+                                    className={styles.modalSecondaryButton}
+                                    onClick={handleCloseExpenseModal}
+                                    disabled={isExpenseSaving}
+                                >
+                                    Anuluj
+                                </button>
+                                <button
+                                    type="submit"
+                                    className={styles.modalPrimaryButton}
+                                    disabled={isExpenseSaving}
+                                >
+                                    {isExpenseSaving ? "Zapisywanie..." : "Dodaj wydatek"}
                                 </button>
                             </div>
                         </form>
