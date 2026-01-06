@@ -174,7 +174,7 @@
 
 .topRow {
     display: grid;
-    grid-template-columns: 1.5fr 1.3fr;
+    grid-template-columns: 1.3fr 1.3fr;
     gap: 24px;
     margin-bottom: 28px;
 }
@@ -205,13 +205,13 @@
 }
 
 .cardTitle {
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 30px;
+    font-weight: 400;
     margin-bottom: 3px;
 }
 
 .cardDescription {
-    font-size: 13px;
+    font-size: 16px;
     color: #C9CCD6;
     line-height: 1.45;
     margin-top: 8px;
@@ -226,7 +226,7 @@
 }
 
 .cardValueNumber {
-    font-size: 26px;
+    font-size: 50px;
     font-weight: 600;
     padding-right: 10px;
 }
@@ -270,7 +270,9 @@
     align-items: stretch;
 }
 
+
 .historyCard {
+    height: 100%;
     background: #1F2330;
     border-radius: 15px;
     border: 1.5px solid #FFFFFF;
@@ -339,14 +341,16 @@
 }
 
 .fabList {
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
 .fabItem {
+    flex: 1;
     width: 100%;
-    min-height: 110px;
+    min-height: 0;
     padding: 12px 14px;
     border-radius: 15px;
     border: 1.5px solid #FFFFFF;
@@ -357,9 +361,12 @@
     color: #F9FAFB;
     box-shadow: 0 8px 20px rgba(8, 10, 18, 0.4);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 12px;
 }
+
 
     .fabItem:hover {
         background: #262b3a;
@@ -368,6 +375,12 @@
 .fabLabel {
     display: inline-block;
     font-family: var(--font-afacad);
+    font-size: 20px;
+}
+
+.fabIcon {
+    display: block;
+    opacity: 0.9;
 }
 
 .statsGrid {
@@ -895,8 +908,8 @@
 }
 
 .historyTitle {
-    font-size: 22px;
-    font-weight: 600;
+    font-size: 30px;
+    font-weight: 400;
     text-align: center;
     text-transform: lowercase;
     margin: 0;

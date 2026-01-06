@@ -1002,23 +1002,41 @@ function DashboardPage() {
                                         </div>
 
 
-                                <div className={styles.fabList}>
-                                    <button className={styles.fabItem}>
-                                        <span className={styles.fabLabel}>
-                                            Planowane wydatki
-                                        </span>
-                                    </button>
-                                    <button className={styles.fabItem}>
-                                        <span className={styles.fabLabel}>
-                                            Członkowie budżetu
-                                        </span>
-                                    </button>
-                                    <button className={styles.fabItem}>
-                                        <span className={styles.fabLabel}>
-                                            Ustawienia budżetu
-                                        </span>
-                                    </button>
-                                </div>
+                                        <div className={styles.fabList}>
+                                            <button className={styles.fabItem}>
+                                                <span className={styles.fabLabel}>Planowane wydatki</span>
+                                                <Image
+                                                    src="/calendar.svg"
+                                                    alt=""
+                                                    width={36}
+                                                    height={36}
+                                                    className={styles.fabIcon}
+                                                />
+                                            </button>
+
+                                            <button className={styles.fabItem}>
+                                                <span className={styles.fabLabel}>Członkowie budżetu</span>
+                                                <Image
+                                                    src="/group.svg"
+                                                    alt=""
+                                                    width={36}
+                                                    height={36}
+                                                    className={styles.fabIcon}
+                                                />
+                                            </button>
+
+                                            <button className={styles.fabItem}>
+                                                <span className={styles.fabLabel}>Ustawienia budżetu</span>
+                                                <Image
+                                                    src="/settings.svg"
+                                                    alt=""
+                                                    width={36}
+                                                    height={36}
+                                                    className={styles.fabIcon}
+                                                />
+                                            </button>
+                                        </div>
+
                             </aside>
                         </section>
 
