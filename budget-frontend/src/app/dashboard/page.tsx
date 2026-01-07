@@ -403,40 +403,35 @@ function DashboardPage() {
         setDictionariesLoading(true);
         try {
             const token = localStorage.getItem("authToken");
-            if (!token) return;
+            if (!token) return; 
 
-             const headers = { "Authorization": `Bearer ${token}` };
+             const headers = { "Authorization": `Bearer [token]` }; 
+             const validHeaders = { "Authorization": `Bearer ${token}` };
             
             const [catRes, pmRes, frRes] = await Promise.all([
-                fetch(`${apiUrl}/api/categories`, { headers }),
-                fetch(`${apiUrl}/api/payment-methods`, { headers }),
-                fetch(`${apiUrl}/api/dictionaries/frequencies`, { headers })
-            ]);
+                fetch(`${apiUrl}/api/categories`, { headers: validHeaders }),
+                fetch(`${apiUrl}/api/dictionaries`, { headers: validHeaders }), 
+                fetch(`${apiUrl}/api/dictionaries/frequencies`, { headers: validHeaders })
+            ]); 
 
             if (catRes.ok) {
-                 const cats = await catRes.json() as CategoryDto[];
+                const cats = await catRes.json() as CategoryDto[]; 
                 setExpenseCategories(Array.isArray(cats) ? cats : []);
             } else {
                 setExpenseCategories([]);
             }
 
              if (pmRes.ok) {
-                const pms = await pmRes.json();
-                const pmData = Array.isArray(pms) ? pms : (pms.data || []);
-                
-                const formattedPms: PaymentMethodDto[] = pmData.map((item: { id?: number; value?: number; name: string }) => ({
-                    value: item.id ?? item.value ?? 0,
-                    name: item.name
-                }));
-                setPaymentMethods(formattedPms);
+                const pms = await pmRes.json() as PaymentMethodDto[];
+                setPaymentMethods(Array.isArray(pms) ? pms : []); 
             } else {
-                console.error("Nie udało się pobrać metod płatności:", pmRes.status);
+                console.error("Błąd metod płatności:", pmRes.status);
                 setPaymentMethods([]);
             }
 
 
             if (frRes.ok) {
-                const frs = await frRes.json() as FrequencyDto[];
+                const frs = await frRes.json() as FrequencyDto[]; 
                 setFrequencies(Array.isArray(frs) ? frs : []);
             } else {
                 setFrequencies([]);
