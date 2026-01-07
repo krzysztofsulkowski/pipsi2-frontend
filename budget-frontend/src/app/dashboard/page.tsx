@@ -16,7 +16,7 @@ interface UserResponse {
     email?: string;
 }
 
-type ApiResponse = Budget[] | { data: Budget[] };
+interface BudgetListResponse { data?: Budget[] } 
 
 interface CategoryDto {
     id: number;
@@ -31,6 +31,18 @@ interface PaymentMethodDto {
 interface FrequencyDto {
     value: number;
     name: string;
+}
+
+interface ExpenseRequestBody { 
+    categoryId: number;
+    description: string;
+    paymentMethod: number;
+    amount: number;
+    expenseType: number;
+    receiptImageUrl: string | null;
+    frequency: number | null;
+    startDate: string | null;
+    endDate: string | null;
 }
 
 function DashboardPage() {
@@ -99,12 +111,12 @@ function DashboardPage() {
             });
 
             if (res.ok) {
-                const data = await res.json();
+                const data = await res.json() as Budget[] | BudgetListResponse; 
                 let budgetsArray: Budget[] = [];
                 if (Array.isArray(data)) {
                     budgetsArray = data;
-                } else if ("data" in data && Array.isArray((data as any).data)) {
-                    budgetsArray = (data as any).data;
+                } else if (data && data.data && Array.isArray(data.data)) { 
+                    budgetsArray = data.data;
                 }
                 setBudgets(budgetsArray);
 
@@ -141,7 +153,7 @@ function DashboardPage() {
                 return;
             }
 
-            const data = await res.json();
+            const data = await res.json() as Transaction[];
             setRawData(Array.isArray(data) ? data : []);
         } catch (e) {
             console.error("Błąd pobierania statystyk", e);
@@ -198,10 +210,10 @@ function DashboardPage() {
 
     const { totalIncome, totalExpenses } = rawData.reduce(
         (acc, curr) => {
-            const amount = Number((curr as any).amount) || 0;
-            if ((curr as any).type === 0) {
+            const amount = Number(curr.amount) || 0; 
+            if (curr.type === 0) { 
                 acc.totalIncome += amount;
-            } else if ((curr as any).type === 1) {
+            } else if (curr.type === 1) {
                 acc.totalExpenses += amount;
             }
             return acc;
@@ -213,25 +225,25 @@ function DashboardPage() {
 
     const hasBudgets = budgets.length > 0;
     const expenseOnlyData = rawData.filter(t => t.type === 1);
-    const recentTransactions = useMemo(() => {
-        const toTime = (d: any) => {
+     const recentTransactions = useMemo(() => {
+        const toTime = (d: string | Date | undefined) => { 
             const t = d ? new Date(d).getTime() : 0;
             return Number.isFinite(t) ? t : 0;
         };
 
         return [...rawData]
-            .sort((a: any, b: any) => toTime(b.date) - toTime(a.date))
+            .sort((a, b) => toTime(b.date) - toTime(a.date)) 
             .slice(0, 7);
     }, [rawData]);
 
-    const formatDatePL = (d: any) => {
+     const formatDatePL = (d: string | Date | undefined) => {
         if (!d) return "-";
         const dt = new Date(d);
         if (Number.isNaN(dt.getTime())) return "-";
         return dt.toLocaleDateString("pl-PL");
     };
 
-    const formatAmountPL = (amount: any) => {
+    const formatAmountPL = (amount: number | string | undefined) => {
         const n = Number(amount);
         const val = Number.isFinite(n) ? Math.abs(n) : 0;
         return val.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -393,28 +405,38 @@ function DashboardPage() {
             const token = localStorage.getItem("authToken");
             if (!token) return;
 
+             const headers = { "Authorization": `Bearer ${token}` };
+            
             const [catRes, pmRes, frRes] = await Promise.all([
-                fetch(`${apiUrl}/api/categories`, { headers: { "Authorization": `Bearer ${token}` } }),
-                fetch(`${apiUrl}/api/dictionaries`, { headers: { "Authorization": `Bearer ${token}` } }),
-                fetch(`${apiUrl}/api/dictionaries/frequencies`, { headers: { "Authorization": `Bearer ${token}` } })
+                fetch(`${apiUrl}/api/categories`, { headers }),
+                fetch(`${apiUrl}/api/payment-methods`, { headers }),
+                fetch(`${apiUrl}/api/dictionaries/frequencies`, { headers })
             ]);
 
             if (catRes.ok) {
-                const cats = await catRes.json();
+                 const cats = await catRes.json() as CategoryDto[];
                 setExpenseCategories(Array.isArray(cats) ? cats : []);
             } else {
                 setExpenseCategories([]);
             }
 
-            if (pmRes.ok) {
+             if (pmRes.ok) {
                 const pms = await pmRes.json();
-                setPaymentMethods(Array.isArray(pms) ? pms : []);
+                const pmData = Array.isArray(pms) ? pms : (pms.data || []);
+                
+                const formattedPms: PaymentMethodDto[] = pmData.map((item: { id?: number; value?: number; name: string }) => ({
+                    value: item.id ?? item.value ?? 0,
+                    name: item.name
+                }));
+                setPaymentMethods(formattedPms);
             } else {
+                console.error("Nie udało się pobrać metod płatności:", pmRes.status);
                 setPaymentMethods([]);
             }
 
+
             if (frRes.ok) {
-                const frs = await frRes.json();
+                const frs = await frRes.json() as FrequencyDto[];
                 setFrequencies(Array.isArray(frs) ? frs : []);
             } else {
                 setFrequencies([]);
@@ -498,26 +520,17 @@ function DashboardPage() {
 
             const expenseTypeValue = expenseType === "instant" ? 0 : expenseType === "recurring" ? 1 : 2;
 
-            const body: any = {
+            const body: ExpenseRequestBody = { 
                 categoryId: Number(expenseCategoryId),
                 description: expenseDescription.trim(),
                 paymentMethod: Number(expensePaymentMethod),
                 amount: Number(expenseAmountInput.replace(",", ".")),
                 expenseType: expenseTypeValue,
                 receiptImageUrl: null,
-                frequency: null,
-                startDate: null,
+                frequency: expenseType === "recurring" ? Number(expenseFrequency) : null, 
+                startDate: (expenseType === "recurring" || expenseType === "planned") ? new Date(expenseStartDate).toISOString() : null, // Mapowanie daty
                 endDate: null
             };
-
-            if (expenseType === "recurring") {
-                body.frequency = Number(expenseFrequency);
-                body.startDate = new Date(expenseStartDate).toISOString();
-            }
-
-            if (expenseType === "planned") {
-                body.startDate = new Date(expenseStartDate).toISOString();
-            }
 
             const res = await fetch(`${apiUrl}/api/budget/${selectedBudgetId}/expenses`, {
                 method: "POST",

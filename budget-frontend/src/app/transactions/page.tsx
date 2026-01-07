@@ -1,26 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import styles from "./TransactionHistory.module.css";
-
-type Tx = any;
+import { Transaction, Budget, mapPaymentMethodIdToName } from "@/types";
 
 const currencySymbol = "ZŁ";
 
+interface ApiResponseWrapper<T> {
+  data: T;
+}
+
 export default function TransactionHistoryPage() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-
   const now = new Date();
-  const [selectedYear, setSelectedYear] = React.useState(now.getFullYear());
-  const [selectedMonth, setSelectedMonth] = React.useState(now.getMonth() + 1);
-
-  const [budgets, setBudgets] = React.useState<any[]>([]);
-  const [selectedBudgetId, setSelectedBudgetId] = React.useState<number | null>(null);
-
-  const [rawData, setRawData] = React.useState<Tx[]>([]);
-  const [loading, setLoading] = React.useState(true);
-
-  const currentBudget = budgets.find((b: any) => b.id === selectedBudgetId);
+  
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [selectedBudgetId, setSelectedBudgetId] = useState<number | null>(null);
+  const [rawData, setRawData] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const refreshBudgetsList = async () => {
     try {
@@ -31,30 +30,20 @@ export default function TransactionHistoryPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) {
-        setBudgets([]);
-        return;
-      }
-
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : data?.data ?? [];
-      setBudgets(list);
-
-      if (list.length > 0) {
-        setSelectedBudgetId((prev) => {
-          if (prev && list.some((b: any) => b.id === prev)) return prev;
-          return list[0].id;
-        });
-      } else {
-        setSelectedBudgetId(null);
+      if (res.ok) {
+        const data = await res.json() as Budget[] | ApiResponseWrapper<Budget[]>;
+        const list = Array.isArray(data) ? data : data.data;
+        setBudgets(list);
+        if (list.length > 0 && !selectedBudgetId) {
+          setSelectedBudgetId(list[0].id);
+        }
       }
     } catch {
       setBudgets([]);
-      setSelectedBudgetId(null);
     }
   };
 
-  const refreshTransactions = async (budgetId: number, year: number, month: number) => {
+   const refreshTransactions = async (budgetId: number, year: number, month: number) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
@@ -65,40 +54,41 @@ export default function TransactionHistoryPage() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (!res.ok) {
-        setRawData([]);
-        return;
+      if (res.ok) {
+        const data = await res.json() as Transaction[];
+        setRawData(Array.isArray(data) ? data : []);
       }
-
-      const data = await res.json();
-      setRawData(Array.isArray(data) ? data : []);
     } finally {
       setLoading(false);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     refreshBudgetsList();
   }, []);
 
-  React.useEffect(() => {
-    if (!selectedBudgetId) return;
-    refreshTransactions(selectedBudgetId, selectedYear, selectedMonth);
+  useEffect(() => {
+    if (selectedBudgetId) {
+      refreshTransactions(selectedBudgetId, selectedYear, selectedMonth);
+    }
   }, [selectedBudgetId, selectedYear, selectedMonth]);
 
-  const { totalIncome, totalExpenses } = rawData.reduce(
-    (acc: any, t: any) => {
-      const amount = Number(t.amount) || 0;
-      if (t.type === 0) acc.totalIncome += amount;
-      if (t.type === 1) acc.totalExpenses += amount;
-      return acc;
-    },
-    { totalIncome: 0, totalExpenses: 0 }
-  );
+
+  const { totalIncome, totalExpenses } = useMemo(() => {
+    return rawData.reduce(
+      (acc, t) => {
+        const amount = Number(t.amount) || 0;
+        if (t.type === 0) acc.totalIncome += amount;
+        if (t.type === 1) acc.totalExpenses += amount;
+        return acc;
+      },
+      { totalIncome: 0, totalExpenses: 0 }
+    );
+  }, [rawData]);
 
   const balance = totalIncome - totalExpenses;
 
-  const monthLabel = React.useMemo(() => {
+   const monthLabel = useMemo(() => {
     const d = new Date(selectedYear, selectedMonth - 1, 1);
     const m = d.toLocaleString("pl-PL", { month: "long" }).toUpperCase();
     return `${m} ${selectedYear}`;
@@ -229,35 +219,22 @@ export default function TransactionHistoryPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: "18px", color: "#C9CCD6" }}>
-                  Ładowanie danych...
-                </td>
-              </tr>
+               <tr><td colSpan={8}>Ładowanie...</td></tr>
             ) : rawData.length === 0 ? (
-              <tr>
-                <td colSpan={8} style={{ textAlign: "center", padding: "18px", color: "#C9CCD6" }}>
-                  Brak transakcji dla wybranego okresu.
-                </td>
-              </tr>
+               <tr><td colSpan={8}>Brak danych</td></tr>
             ) : (
-              rawData.map((t: any, idx: number) => (
+              rawData.map((t, idx) => (
                 <tr key={t.id ?? idx}>
                   <td>{t.date ? new Date(t.date).toLocaleDateString("pl-PL") : "-"}</td>
                   <td>{t.type === 0 ? "PRZYCHÓD" : "WYDATEK"}</td>
-                  <td>{t.type === 1 ? t.categoryName ?? "-" : "-"}</td>
+                  <td>{t.categoryName ?? "-"}</td>
                   <td>{t.title ?? "-"}</td>
-                  <td>{t.paymentMethodName ?? "-"}</td>
-                  <td
-                    style={{
-                      fontWeight: "700",
-                    color: t.type === 1 ? "#FF6B6B" : "rgb(140, 194, 121)",
-                    }}
-                  >
-                    {(t.type === 1 ? "-" : "") + Number(t.amount || 0).toFixed(2)} {currencySymbol}
+                  <td>{mapPaymentMethodIdToName(t.paymentMethod)}</td>
+                  <td style={{ color: t.type === 1 ? "#FF6B6B" : "#8CC279", fontWeight: 700 }}>
+                    {t.type === 1 ? "-" : ""}{Number(t.amount).toFixed(2)} {currencySymbol}
                   </td>
                   <td>{t.userName ?? "-"}</td>
-                  <td>
+                   <td>
                     <button className={styles.optionButton} type="button">
                       Szczegóły
                     </button>
