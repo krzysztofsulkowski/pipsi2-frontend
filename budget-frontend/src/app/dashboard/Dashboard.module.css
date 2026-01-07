@@ -174,7 +174,7 @@
 
 .topRow {
     display: grid;
-    grid-template-columns: 1.5fr 1.3fr;
+    grid-template-columns: 1.3fr 1.3fr;
     gap: 24px;
     margin-bottom: 28px;
 }
@@ -205,13 +205,13 @@
 }
 
 .cardTitle {
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 30px;
+    font-weight: 400;
     margin-bottom: 3px;
 }
 
 .cardDescription {
-    font-size: 13px;
+    font-size: 16px;
     color: #C9CCD6;
     line-height: 1.45;
     margin-top: 8px;
@@ -226,7 +226,7 @@
 }
 
 .cardValueNumber {
-    font-size: 26px;
+    font-size: 50px;
     font-weight: 600;
     padding-right: 10px;
 }
@@ -270,7 +270,9 @@
     align-items: stretch;
 }
 
+
 .historyCard {
+    height: 100%;
     background: #1F2330;
     border-radius: 15px;
     border: 1.5px solid #FFFFFF;
@@ -289,12 +291,12 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    gap: 22px;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 18px;
     padding-bottom: 10px;
 }
+
 
 
 .historyButton {
@@ -339,14 +341,16 @@
 }
 
 .fabList {
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
 .fabItem {
+    flex: 1;
     width: 100%;
-    min-height: 110px;
+    min-height: 0;
     padding: 12px 14px;
     border-radius: 15px;
     border: 1.5px solid #FFFFFF;
@@ -357,9 +361,12 @@
     color: #F9FAFB;
     box-shadow: 0 8px 20px rgba(8, 10, 18, 0.4);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 12px;
 }
+
 
     .fabItem:hover {
         background: #262b3a;
@@ -368,6 +375,12 @@
 .fabLabel {
     display: inline-block;
     font-family: var(--font-afacad);
+    font-size: 20px;
+}
+
+.fabIcon {
+    display: block;
+    opacity: 0.9;
 }
 
 .statsGrid {
@@ -789,4 +802,195 @@
 
     .profileDropdownItemDanger:hover {
         background: rgba(239, 68, 68, 0.14);
+    }
+
+
+.modalHeaderRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+
+.modalCloseButton {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #F9FAFB;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+
+.modalSelect {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border-radius: 10px;
+    border: 1px solid #494F60;
+    background-color: #272C3C;
+    background-image: url("/arrow-down.svg");
+    background-repeat: no-repeat;
+    background-size: 14px 14px;
+    background-position: right 18px center;
+    padding: 9px 44px 9px 12px;
+    font-size: 14px;
+    color: #F9FAFB;
+    cursor: pointer;
+}
+
+    .modalSelect:focus {
+        outline: none;
+        border-color: #EAC278;
+    }
+
+
+    .modalSelect option {
+        background: #1F2330;
+        color: #F9FAFB;
+    }
+
+.radioRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.radioOption {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid #494F60;
+    background: #272C3C;
+    cursor: pointer;
+    font-family: var(--font-afacad);
+}
+
+    .radioOption input {
+        accent-color: #EAC278;
+    }
+
+    .radioOption span {
+        color: #F9FAFB;
+        font-size: 14px;
+    }
+
+.fieldError {
+    font-size: 11px;
+    color: #ff9c9c;
+    margin-top: 2px;
+}
+
+.modalHint {
+    font-size: 12px;
+    color: #C9CCD6;
+    line-height: 1.45;
+    margin-top: 10px;
+    font-family: var(--font-afacad);
+}
+
+.modalInput[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.9;
+    cursor: pointer;
+}
+
+.historyTitle {
+    font-size: 30px;
+    font-weight: 400;
+    text-align: center;
+    text-transform: lowercase;
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+
+.historyTable {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.historyRow {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.historyLabel {
+    font-size: 18px;
+    font-weight: 600;
+    color: #F9FAFB;
+    font-family: var(--font-baloo);
+    padding-left: 6px;
+}
+
+.historyAmount {
+    font-size: 18px;
+    font-weight: 600;
+    color: #EAC278;
+    font-family: var(--font-afacad);
+    text-align: right;
+    white-space: nowrap;
+    margin-right: 6px;
+}
+
+.historyDate {
+    font-size: 14px;
+    color: #C9CCD6;
+    font-family: var(--font-afacad);
+    text-align: right;
+    white-space: nowrap;
+    padding-left: 16px;
+    padding-right: 6px;
+    border-left: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+
+.historyButtonText {
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: var(--font-afacad);
+}
+
+
+.historyButton {
+    width: 100%;
+    max-width: 320px;
+    height: 78px;
+    margin: 0 auto;
+    border-radius: 14px;
+    background: #3A4055;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    transition: background 0.3s ease, transform 0.2s;
+    padding: 0 18px;
+    text-decoration: none;
+    font-family: var(--font-afacad);
+}
+
+    .historyButton:hover {
+        background: #4B526B;
+        transform: translateY(-2px);
     }
