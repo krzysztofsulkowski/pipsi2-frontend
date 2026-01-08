@@ -14,9 +14,9 @@ function LandingPage() {
 
     const handleGoToLogin = () => router.push("/login");
     const handleGoToRegister = () => router.push("/register");
-    const handleGoToTips = () => router.push("/porady-finansowe");
-    const handleGoToFaq = () => router.push("/faq");
-    const handleGoToAbout = () => router.push("/o-nas");
+    const handleGoToTips = () => router.push("/tips");
+    const handleGoToFaq = () => router.push("/FAQ");
+    const handleGoToAbout = () => router.push("/about-us");
 
     return (
         <div className={dashboardStyles.page}>
