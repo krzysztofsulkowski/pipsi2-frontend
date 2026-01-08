@@ -1,0 +1,191 @@
+.container {
+  min-height: 100vh;
+  background-color: #272C3C;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Afacad', sans-serif;
+  color: #FFFFFF;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.title {
+  width: 100%;
+  max-width: 563px;
+  height: auto;
+  min-height: 135px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFF;
+  font-size: 48px;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+}
+
+.divider {
+  width: 100%;
+  max-width: 689px;
+  height: 1px;
+  background: #FFF;
+}
+
+.subtitle {
+  width: 100%;
+  max-width: 689px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  color: #EAC278;
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.addButton {
+  width: 125px;
+  height: 99.617px;
+  border-radius: 7.184px;
+  background: #1F2330;
+  box-shadow: 0 1.916px 1.916px 0 rgba(0, 0, 0, 0.25);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 30px 0 40px 0;
+  transition: background 0.2s;
+}
+
+.addButton:hover {
+  background: #2a2f40;
+}
+
+.addIcon {
+  width: 16.393px;
+  height: 16.393px;
+  transform: rotate(-45deg);
+}
+
+.btnText {
+  width: 91.954px;
+  color: #FFF;
+  text-align: center;
+  font-size: 13.41px;
+  font-weight: 500;
+  line-height: normal;
+  text-transform: uppercase;
+}
+
+.tableWrapper {
+  width: 100%;
+  max-width: 1200px;
+  background: #1F2330;
+  border-radius: 15px;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  overflow-x: auto;
+  padding: 10px;
+}
+
+.userTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.userTable th {
+  color: #EAC278;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-transform: uppercase;
+}
+
+.userTable td {
+  padding: 16px;
+  color: #FFF;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.idCell {
+  color: #7a7a7a;
+  font-family: monospace;
+}
+
+.statusActive {
+  color: #8CC279;
+  background: rgba(140, 194, 121, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusLocked {
+  color: #FF6B6B;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 15px;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.actionBtn:hover {
+  opacity: 0.7;
+  transform: scale(1.1);
+}
+
+.infoCell {
+  text-align: center;
+  padding: 50px !important;
+  color: #EAC278;
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 32px;
+    min-height: auto;
+    margin-bottom: 10px;
+  }
+  
+  .divider {
+    max-width: 90%;
+  }
+
+  .subtitle {
+    justify-content: center;
+    text-align: center;
+  }
+}
