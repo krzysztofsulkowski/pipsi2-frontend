@@ -1,0 +1,166 @@
+.container {
+  min-height: 100vh;
+  background-color: #272C3C;
+  padding: 60px 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: 'Afacad', sans-serif;
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.title {
+  color: #FFF;
+  font-size: 48px;
+  font-weight: 500;
+  margin: 0;
+  text-align: left;
+}
+
+.divider {
+  width: 100%;
+  max-width: 689px;
+  height: 1px;
+  background: #FFF;
+  margin: 10px 0;
+}
+
+.navigation {
+  margin-top: 5px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.navAccent {
+  color: #EAC278;
+}
+
+.navNormal {
+  color: #FFF;
+}
+
+.tableWrapper {
+  width: 100%;
+  background: #1F2330;
+  border-radius: 15px;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  overflow-x: auto;
+}
+
+.logsTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.logsTable th {
+  color: #EAC278;
+  padding: 18px 20px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-transform: uppercase;
+}
+
+.logsTable td {
+  padding: 16px 20px;
+  color: #FFF;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  color: #FFF;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.eventTypeBadge {
+  background: rgba(234, 194, 120, 0.15);
+  color: #EAC278;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.dateCell {
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.truncate {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: monospace;
+  opacity: 0.7;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pageControls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.pageBtn {
+  background: #2d3446;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: #3e4861;
+}
+
+.pageBtn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+.pageLabel {
+  color: #EAC278;
+  font-weight: 500;
+}
+
+.pageInfo {
+  color: #666;
+  font-size: 13px;
+}
+
+.infoCell {
+  text-align: center;
+  padding: 100px !important;
+  font-size: 18px;
+  color: #EAC278;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 40px 20px;
+  }
+}

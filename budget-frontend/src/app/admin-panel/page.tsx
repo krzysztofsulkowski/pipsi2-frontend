@@ -24,7 +24,7 @@ export default function AdminPage() {
           <span className={styles.cardText}>Użytkownicy</span>
         </Link>
 
-        <button className={styles.card}>
+        <Link href="/admin-panel/logs" className={styles.card}>
           <div className={styles.icon}>
             <Image 
               src="/lupe.svg" 
@@ -34,7 +34,7 @@ export default function AdminPage() {
             />
           </div>
           <span className={styles.cardText}>Logi Systemowe</span>
-        </button>
+        </Link>
       </main>
     </div>
   );
