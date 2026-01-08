@@ -29,10 +29,11 @@ export default function UserBarChart({ data }: { data: Transaction[] }) {
                 <BarChart data={chartData}>
                     <XAxis dataKey="name" stroke="#9CA3AF" tick={{fill: '#9CA3AF'}} />
                     <YAxis stroke="#9CA3AF" tick={{fill: '#9CA3AF'}} />
-                    <Tooltip 
-                        cursor={{fill: 'rgba(255,255,255,0.1)'}}
+                    <Tooltip
+                        cursor={{ fill: 'rgba(255,255,255,0.1)' }}
                         contentStyle={{ backgroundColor: '#1F2937', border: 'none', borderRadius: '8px' }}
                         itemStyle={{ color: '#fff' }}
+                        formatter={(value: number | string) => [`${Number(value).toFixed(2)} zł`, 'Kwota']}
                     />
                     <Bar dataKey="kwota" fill="#EAC278" radius={[4, 4, 0, 0]} name="Kwota Wydatków" />
                 </BarChart>

@@ -48,6 +48,8 @@ interface ExpenseRequestBody {
 function DashboardPage() {
     const router = useRouter();
 
+    const [authChecked, setAuthChecked] = useState(false);
+
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
 
@@ -104,27 +106,32 @@ function DashboardPage() {
         setBudgetsLoading(true);
         try {
             const token = localStorage.getItem("authToken");
-            if (!token) return;
+            if (!token) {
+                router.replace("/landing-page");
+                return;
+            }
 
             const res = await fetch(`${apiUrl}/api/budget/my-budgets`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
 
+            if (res.status === 401) {
+                localStorage.removeItem("authToken");
+                router.replace("/landing-page");
+                return;
+            }
+
             if (res.ok) {
-                const data = await res.json() as Budget[] | BudgetListResponse; 
+                const data = await res.json() as Budget[] | BudgetListResponse;
                 let budgetsArray: Budget[] = [];
-                if (Array.isArray(data)) {
-                    budgetsArray = data;
-                } else if (data && data.data && Array.isArray(data.data)) { 
-                    budgetsArray = data.data;
-                }
+                if (Array.isArray(data)) budgetsArray = data;
+                else if (data?.data && Array.isArray(data.data)) budgetsArray = data.data;
+
                 setBudgets(budgetsArray);
 
                 if (budgetsArray.length > 0) {
                     const currentIdValid = selectedBudgetId && budgetsArray.some(b => b.id === selectedBudgetId);
-                    if (!currentIdValid) {
-                        setSelectedBudgetId(budgetsArray[0].id);
-                    }
+                    if (!currentIdValid) setSelectedBudgetId(budgetsArray[0].id);
                 } else {
                     setLoading(false);
                 }
@@ -143,15 +150,21 @@ function DashboardPage() {
         setLoading(true);
         try {
             const token = localStorage.getItem("authToken");
-            const url = `${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`;
-
-            const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
-            const res = await fetch(url, { headers });
-
-            if (!res.ok) {
-                if (res.status === 401) setBudgets([]);
+            if (!token) {
+                router.replace("/landing-page");
                 return;
             }
+
+            const url = `${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`;
+            const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+
+            if (res.status === 401) {
+                localStorage.removeItem("authToken");
+                router.replace("/landing-page");
+                return;
+            }
+
+            if (!res.ok) return;
 
             const data = await res.json() as Transaction[];
             setRawData(Array.isArray(data) ? data : []);
@@ -162,11 +175,17 @@ function DashboardPage() {
         }
     };
 
+
     useEffect(() => {
         const fetchInitialData = async () => {
             const token = localStorage.getItem("authToken");
-            if (!token) return;
 
+            if (!token) {
+                router.replace("/landing-page");
+                return;
+            }
+
+            setAuthChecked(true);
             const fetchUser = async () => {
                 try {
                     const res = await fetch(`${apiUrl}/api/authentication/me`, {
@@ -557,6 +576,8 @@ function DashboardPage() {
         }
     };
 
+    if (!authChecked) return null;
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -676,6 +697,7 @@ function DashboardPage() {
             </header>
 
             <main className={styles.main}>
+                <div className={styles.content}>
                 {budgetsLoading ? (
                     <div className={styles.loadingWrapper}>
                         <p className={styles.loadingText}>
@@ -1010,41 +1032,22 @@ function DashboardPage() {
                                         </div>
 
 
-                                        <div className={styles.fabList}>
-                                            <button className={styles.fabItem}>
+                                        <div className={styles.rightTiles}>
+                                            <Link href="/planned-expences" className={styles.fabItem}>
                                                 <span className={styles.fabLabel}>Planowane wydatki</span>
-                                                <Image
-                                                    src="/calendar.svg"
-                                                    alt=""
-                                                    width={36}
-                                                    height={36}
-                                                    className={styles.fabIcon}
-                                                />
-                                            </button>
+                                                <Image src="/calendar.svg" alt="" width={36} height={36} className={styles.fabIcon} />
+                                            </Link>
 
-                                            <button className={styles.fabItem}>
+                                            <Link href="/budget-team" className={styles.fabItem}>
                                                 <span className={styles.fabLabel}>Członkowie budżetu</span>
-                                                <Image
-                                                    src="/group.svg"
-                                                    alt=""
-                                                    width={36}
-                                                    height={36}
-                                                    className={styles.fabIcon}
-                                                />
-                                            </button>
+                                                <Image src="/group.svg" alt="" width={36} height={36} className={styles.fabIcon} />
+                                            </Link>
 
-                                            <button className={styles.fabItem}>
+                                            <Link href="/budget-settings" className={styles.fabItem}>
                                                 <span className={styles.fabLabel}>Ustawienia budżetu</span>
-                                                <Image
-                                                    src="/settings.svg"
-                                                    alt=""
-                                                    width={36}
-                                                    height={36}
-                                                    className={styles.fabIcon}
-                                                />
-                                            </button>
+                                                <Image src="/settings.svg" alt="" width={36} height={36} className={styles.fabIcon} />
+                                            </Link>
                                         </div>
-
                             </aside>
                         </section>
 
@@ -1104,7 +1107,8 @@ function DashboardPage() {
                             </button>
                         </section>
                     </>
-                )}
+                    )}
+                </div>
             </main>
 
             {isCreateModalOpen && (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -57,8 +57,25 @@ export default function FAQPage() {
 
     const handleLogout = () => {
         localStorage.removeItem("authToken");
+        setIsAuthenticated(false);
         setIsProfileMenuOpen(false);
         router.push("/login");
+    };
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    useEffect(() => {
+        const token = localStorage.getItem("authToken");
+        setIsAuthenticated(!!token);
+    }, []);
+
+    const handleGoToLogin = () => {
+        setIsProfileMenuOpen(false);
+        router.push("/login");
+    };
+
+    const handleGoToRegister = () => {
+        setIsProfileMenuOpen(false);
+        router.push("/register");
     };
 
     return (
@@ -96,36 +113,58 @@ export default function FAQPage() {
                         >
                             <Image src="/profile-icon.svg" alt="Profil" width={22} height={22} />
                         </button>
-
                         {isProfileMenuOpen && (
                             <div className={dashboardStyles.profileDropdown}>
-                                <button
-                                    type="button"
-                                    className={dashboardStyles.profileDropdownItem}
-                                    onClick={() => setIsProfileMenuOpen(false)}
-                                >
-                                    Ustawienia
-                                </button>
+                                {!isAuthenticated ? (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className={dashboardStyles.profileDropdownItem}
+                                            onClick={handleGoToLogin}
+                                        >
+                                            Zaloguj się
+                                        </button>
 
-                                <button
-                                    type="button"
-                                    className={dashboardStyles.profileDropdownItem}
-                                    onClick={() => setIsProfileMenuOpen(false)}
-                                >
-                                    Zmiana języka
-                                </button>
+                                        <button
+                                            type="button"
+                                            className={dashboardStyles.profileDropdownItem}
+                                            onClick={handleGoToRegister}
+                                        >
+                                            Załóż konto
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className={dashboardStyles.profileDropdownItem}
+                                            onClick={() => setIsProfileMenuOpen(false)}
+                                        >
+                                            Ustawienia
+                                        </button>
 
-                                <div className={dashboardStyles.profileDropdownDivider} />
+                                        <button
+                                            type="button"
+                                            className={dashboardStyles.profileDropdownItem}
+                                            onClick={() => setIsProfileMenuOpen(false)}
+                                        >
+                                            Zmiana języka
+                                        </button>
 
-                                <button
-                                    type="button"
-                                    className={dashboardStyles.profileDropdownItemDanger}
-                                    onClick={handleLogout}
-                                >
-                                    Wyloguj się
-                                </button>
+                                        <div className={dashboardStyles.profileDropdownDivider} />
+
+                                        <button
+                                            type="button"
+                                            className={dashboardStyles.profileDropdownItemDanger}
+                                            onClick={handleLogout}
+                                        >
+                                            Wyloguj się
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         )}
+
                     </div>
                 </nav>
             </header>
