@@ -676,6 +676,7 @@ function DashboardPage() {
             </header>
 
             <main className={styles.main}>
+                <div className={styles.content}>
                 {budgetsLoading ? (
                     <div className={styles.loadingWrapper}>
                         <p className={styles.loadingText}>
@@ -1010,41 +1011,22 @@ function DashboardPage() {
                                         </div>
 
 
-                                        <div className={styles.fabList}>
-                                            <button className={styles.fabItem}>
+                                        <div className={styles.rightTiles}>
+                                            <Link href="/planned-expences" className={styles.fabItem}>
                                                 <span className={styles.fabLabel}>Planowane wydatki</span>
-                                                <Image
-                                                    src="/calendar.svg"
-                                                    alt=""
-                                                    width={36}
-                                                    height={36}
-                                                    className={styles.fabIcon}
-                                                />
-                                            </button>
+                                                <Image src="/calendar.svg" alt="" width={36} height={36} className={styles.fabIcon} />
+                                            </Link>
 
-                                            <button className={styles.fabItem}>
+                                            <Link href="/budget-team" className={styles.fabItem}>
                                                 <span className={styles.fabLabel}>Członkowie budżetu</span>
-                                                <Image
-                                                    src="/group.svg"
-                                                    alt=""
-                                                    width={36}
-                                                    height={36}
-                                                    className={styles.fabIcon}
-                                                />
-                                            </button>
+                                                <Image src="/group.svg" alt="" width={36} height={36} className={styles.fabIcon} />
+                                            </Link>
 
-                                            <button className={styles.fabItem}>
+                                            <Link href="/budget-settings" className={styles.fabItem}>
                                                 <span className={styles.fabLabel}>Ustawienia budżetu</span>
-                                                <Image
-                                                    src="/settings.svg"
-                                                    alt=""
-                                                    width={36}
-                                                    height={36}
-                                                    className={styles.fabIcon}
-                                                />
-                                            </button>
+                                                <Image src="/settings.svg" alt="" width={36} height={36} className={styles.fabIcon} />
+                                            </Link>
                                         </div>
-
                             </aside>
                         </section>
 
@@ -1104,7 +1086,8 @@ function DashboardPage() {
                             </button>
                         </section>
                     </>
-                )}
+                    )}
+                </div>
             </main>
 
             {isCreateModalOpen && (
