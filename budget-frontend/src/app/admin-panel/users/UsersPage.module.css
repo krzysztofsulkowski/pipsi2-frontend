@@ -1,10 +1,10 @@
 .container {
   min-height: 100vh;
   background-color: #272C3C;
-  padding: 40px 20px;
+  padding: 60px 5%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   font-family: 'Afacad', sans-serif;
   color: #FFFFFF;
 }
@@ -12,24 +12,18 @@
 .header {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
+  align-items: flex-start;
   width: 100%;
+  margin-bottom: 20px;
 }
 
 .title {
-  width: 100%;
-  max-width: 563px;
-  height: auto;
-  min-height: 135px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: #FFF;
   font-size: 48px;
   font-weight: 500;
-  text-align: center;
+  text-align: left;
   margin: 0;
+  line-height: normal;
 }
 
 .divider {
@@ -37,18 +31,20 @@
   max-width: 689px;
   height: 1px;
   background: #FFF;
+  margin: 10px 0;
 }
 
-.subtitle {
-  width: 100%;
-  max-width: 689px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  color: #EAC278;
+.navigation {
   font-size: 20px;
   font-weight: 500;
-  margin-top: 10px;
+}
+
+.navAccent {
+  color: #EAC278;
+}
+
+.navNormal {
+  color: #FFF;
 }
 
 .addButton {
@@ -64,8 +60,10 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin: 30px 0 40px 0;
+  margin: 10px 0 40px 0;
   transition: background 0.2s;
+  
+  align-self: flex-end; 
 }
 
 .addButton:hover {
@@ -90,12 +88,10 @@
 
 .tableWrapper {
   width: 100%;
-  max-width: 1200px;
   background: #1F2330;
   border-radius: 15px;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
   overflow-x: auto;
-  padding: 10px;
 }
 
 .userTable {
@@ -106,25 +102,24 @@
 
 .userTable th {
   color: #EAC278;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   text-align: left;
-  padding: 16px;
+  padding: 18px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   text-transform: uppercase;
 }
 
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
 .userTable td {
-  padding: 16px;
+  padding: 16px 20px;
   color: #FFF;
   font-size: 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  vertical-align: middle;
-}
-
-.idCell {
-  color: #7a7a7a;
-  font-family: monospace;
 }
 
 .statusActive {
@@ -155,37 +150,36 @@
   border: none;
   cursor: pointer;
   padding: 5px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pageControls {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: transform 0.1s, opacity 0.2s;
+  gap: 20px;
 }
 
-.actionBtn:hover {
-  opacity: 0.7;
-  transform: scale(1.1);
+.pageBtn {
+  background: #2d3446;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-.infoCell {
-  text-align: center;
-  padding: 50px !important;
+.pageBtn:disabled {
+  opacity: 0.2;
+}
+
+.pageLabel {
   color: #EAC278;
-  font-size: 18px;
-}
-
-@media (max-width: 768px) {
-  .title {
-    font-size: 32px;
-    min-height: auto;
-    margin-bottom: 10px;
-  }
-  
-  .divider {
-    max-width: 90%;
-  }
-
-  .subtitle {
-    justify-content: center;
-    text-align: center;
-  }
+  font-weight: 500;
 }

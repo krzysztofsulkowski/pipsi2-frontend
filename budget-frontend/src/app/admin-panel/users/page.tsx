@@ -13,27 +13,14 @@ interface UserDto {
   isLocked: boolean;
 }
 
-interface DataTableResponse {
-  draw: number;
-  recordsTotal: number;
-  recordsFiltered: number;
-  data: UserDto[];
-}
-
 export default function UsersManagementPage() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-  
   const [users, setUsers] = useState<UserDto[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const [tableParams] = useState({
-    draw: 1,
-    start: 0,
-    length: 10,
-    searchValue: "",
-    orderColumn: 0,
-    orderDir: "asc"
-  });
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [pageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState({ column: 1, direction: "asc" as "asc" | "desc" });
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -43,41 +30,36 @@ export default function UsersManagementPage() {
 
       const response = await fetch(`${apiUrl}/api/adminPanel/users/get-all-users`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          Draw: tableParams.draw,
-          Start: tableParams.start,
-          Length: tableParams.length,
-          SearchValue: tableParams.searchValue,
-          OrderColumn: tableParams.orderColumn,
-          OrderDir: tableParams.orderDir
+          Draw: 1,
+          Start: (currentPage - 1) * pageSize,
+          Length: pageSize,
+          SearchValue: "",
+          OrderColumn: sortConfig.column,
+          OrderDir: sortConfig.direction
         }),
       });
 
       if (response.ok) {
-        const result = (await response.json()) as DataTableResponse;
+        const result = await response.json();
         setUsers(result.data || []);
+        setTotalRecords(result.recordsFiltered);
       }
-    } catch (error) {
-      console.error("Błąd pobierania:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [apiUrl, tableParams]);
+    } catch (error) { console.error(error); } finally { setLoading(false); }
+  }, [apiUrl, currentPage, pageSize, sortConfig]);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   return (
     <main className={styles.container}>
       <header className={styles.header}>
         <h1 className={styles.title}>Panel Administracyjny</h1>
         <div className={styles.divider}></div>
-        <p className={styles.subtitle}>Zarządzanie Użytkownikami</p>
+        <div className={styles.navigation}>
+          <span className={styles.navAccent}>Panel Administracyjny</span>
+          <span className={styles.navNormal}> &gt; Zarządzanie użytkownikami</span>
+        </div>
       </header>
 
       <button className={styles.addButton} type="button">
@@ -99,13 +81,11 @@ export default function UsersManagementPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className={styles.infoCell}>Ładowanie danych...</td></tr>
-            ) : users.length === 0 ? (
-              <tr><td colSpan={6} className={styles.infoCell}>Brak użytkowników w systemie.</td></tr>
+              <tr><td colSpan={6} style={{textAlign:'center', padding: '40px'}}>Ładowanie danych...</td></tr>
             ) : (
               users.map((user) => (
                 <tr key={user.userId}>
-                  <td className={styles.idCell}>{user.userId.substring(0, 8)}...</td>
+                  <td style={{color:'#777'}}>{user.userId.substring(0, 8)}...</td>
                   <td>{user.email}</td>
                   <td>{user.userName}</td>
                   <td>
@@ -116,12 +96,8 @@ export default function UsersManagementPage() {
                   <td>{user.roleName || "Brak roli"}</td>
                   <td>
                     <div className={styles.actionButtons}>
-                      <button className={styles.actionBtn}>
-                        <Image src="/edit.svg" alt="Edytuj" width={22} height={22} />
-                      </button>
-                      <button className={styles.actionBtn}>
-                        <Image src="/delete.svg" alt="Usuń" width={22} height={22} />
-                      </button>
+                      <button className={styles.actionBtn}><Image src="/edit.svg" alt="Edit" width={22} height={22}/></button>
+                      <button className={styles.actionBtn}><Image src="/delete.svg" alt="Delete" width={22} height={22}/></button>
                     </div>
                   </td>
                 </tr>
