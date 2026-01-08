@@ -48,6 +48,8 @@ interface ExpenseRequestBody {
 function DashboardPage() {
     const router = useRouter();
 
+    const [authChecked, setAuthChecked] = useState(false);
+
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
 
@@ -104,27 +106,32 @@ function DashboardPage() {
         setBudgetsLoading(true);
         try {
             const token = localStorage.getItem("authToken");
-            if (!token) return;
+            if (!token) {
+                router.replace("/landing-page");
+                return;
+            }
 
             const res = await fetch(`${apiUrl}/api/budget/my-budgets`, {
                 headers: { "Authorization": `Bearer ${token}` }
             });
 
+            if (res.status === 401) {
+                localStorage.removeItem("authToken");
+                router.replace("/landing-page");
+                return;
+            }
+
             if (res.ok) {
-                const data = await res.json() as Budget[] | BudgetListResponse; 
+                const data = await res.json() as Budget[] | BudgetListResponse;
                 let budgetsArray: Budget[] = [];
-                if (Array.isArray(data)) {
-                    budgetsArray = data;
-                } else if (data && data.data && Array.isArray(data.data)) { 
-                    budgetsArray = data.data;
-                }
+                if (Array.isArray(data)) budgetsArray = data;
+                else if (data?.data && Array.isArray(data.data)) budgetsArray = data.data;
+
                 setBudgets(budgetsArray);
 
                 if (budgetsArray.length > 0) {
                     const currentIdValid = selectedBudgetId && budgetsArray.some(b => b.id === selectedBudgetId);
-                    if (!currentIdValid) {
-                        setSelectedBudgetId(budgetsArray[0].id);
-                    }
+                    if (!currentIdValid) setSelectedBudgetId(budgetsArray[0].id);
                 } else {
                     setLoading(false);
                 }
@@ -143,15 +150,21 @@ function DashboardPage() {
         setLoading(true);
         try {
             const token = localStorage.getItem("authToken");
-            const url = `${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`;
-
-            const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
-            const res = await fetch(url, { headers });
-
-            if (!res.ok) {
-                if (res.status === 401) setBudgets([]);
+            if (!token) {
+                router.replace("/landing-page");
                 return;
             }
+
+            const url = `${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`;
+            const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+
+            if (res.status === 401) {
+                localStorage.removeItem("authToken");
+                router.replace("/landing-page");
+                return;
+            }
+
+            if (!res.ok) return;
 
             const data = await res.json() as Transaction[];
             setRawData(Array.isArray(data) ? data : []);
@@ -162,11 +175,17 @@ function DashboardPage() {
         }
     };
 
+
     useEffect(() => {
         const fetchInitialData = async () => {
             const token = localStorage.getItem("authToken");
-            if (!token) return;
 
+            if (!token) {
+                router.replace("/landing-page");
+                return;
+            }
+
+            setAuthChecked(true);
             const fetchUser = async () => {
                 try {
                     const res = await fetch(`${apiUrl}/api/authentication/me`, {
@@ -556,6 +575,8 @@ function DashboardPage() {
             setIsExpenseSaving(false);
         }
     };
+
+    if (!authChecked) return null;
 
     return (
         <div className={styles.page}>
