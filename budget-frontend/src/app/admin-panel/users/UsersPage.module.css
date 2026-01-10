@@ -1,0 +1,185 @@
+.container {
+  min-height: 100vh;
+  background-color: #272C3C;
+  padding: 60px 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: 'Afacad', sans-serif;
+  color: #FFFFFF;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.title {
+  color: #FFF;
+  font-size: 48px;
+  font-weight: 500;
+  text-align: left;
+  margin: 0;
+  line-height: normal;
+}
+
+.divider {
+  width: 100%;
+  max-width: 689px;
+  height: 1px;
+  background: #FFF;
+  margin: 10px 0;
+}
+
+.navigation {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.navAccent {
+  color: #EAC278;
+}
+
+.navNormal {
+  color: #FFF;
+}
+
+.addButton {
+  width: 125px;
+  height: 99.617px;
+  border-radius: 7.184px;
+  background: #1F2330;
+  box-shadow: 0 1.916px 1.916px 0 rgba(0, 0, 0, 0.25);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 40px 0;
+  transition: background 0.2s;
+  
+  align-self: flex-end; 
+}
+
+.addButton:hover {
+  background: #2a2f40;
+}
+
+.addIcon {
+  width: 16.393px;
+  height: 16.393px;
+  transform: rotate(-45deg);
+}
+
+.btnText {
+  width: 91.954px;
+  color: #FFF;
+  text-align: center;
+  font-size: 13.41px;
+  font-weight: 500;
+  line-height: normal;
+  text-transform: uppercase;
+}
+
+.tableWrapper {
+  width: 100%;
+  background: #1F2330;
+  border-radius: 15px;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  overflow-x: auto;
+}
+
+.userTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.userTable th {
+  color: #EAC278;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-transform: uppercase;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.userTable td {
+  padding: 16px 20px;
+  color: #FFF;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.statusActive {
+  color: #8CC279;
+  background: rgba(140, 194, 121, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusLocked {
+  color: #FF6B6B;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 15px;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pageControls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.pageBtn {
+  background: #2d3446;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pageBtn:disabled {
+  opacity: 0.2;
+}
+
+.pageLabel {
+  color: #EAC278;
+  font-weight: 500;
+}
