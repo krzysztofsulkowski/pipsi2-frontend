@@ -21,14 +21,12 @@ interface RoleDto {
 export default function UsersManagementPage() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   
-  // States
   const [users, setUsers] = useState<UserDto[]>([]);
   const [roles, setRoles] = useState<RoleDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
-
-  // Pagination / Sort states
+  
   const [totalRecords, setTotalRecords] = useState(0);
   const [pageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -80,7 +78,7 @@ export default function UsersManagementPage() {
 
   useEffect(() => { fetchUsers(); fetchRoles(); }, [fetchUsers, fetchRoles]);
 
-  // Edycja po kliknięciu ikonki
+  // Edycja
   const handleEditClick = async (userId: string) => {
     try {
       const token = localStorage.getItem("authToken");
@@ -140,6 +138,29 @@ export default function UsersManagementPage() {
     } catch (error) { console.error(error); }
   };
 
+  const handleToggleLock = async (userId: string, isCurrentlyLocked: boolean) => {
+    const action = isCurrentlyLocked ? "unlock-user" : "lock-user";
+    
+    if (!isCurrentlyLocked && !confirm("Czy na pewno chcesz zablokować tego użytkownika?")) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(`${apiUrl}/api/adminPanel/users/${action}/${userId}`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        fetchUsers(); 
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || "Błąd podczas zmiany statusu użytkownika");
+      }
+    } catch (error) {
+      console.error("Lock error:", error);
+    }
+  };
+
   return (
     <main className={styles.container}>
       <header className={styles.header}>
@@ -186,7 +207,6 @@ export default function UsersManagementPage() {
                 <input type="text" className={styles.inputField} value={formData.userName} onChange={(e) => setFormData({...formData, userName: e.target.value})} required />
               </div>
 
-              {/* Hasło tylko przy dodawaniu */}
               {!editingUserId && (
                 <div className={styles.formGroup}>
                   <div className={styles.stepHeader}>
@@ -238,11 +258,14 @@ export default function UsersManagementPage() {
                   <td>{user.roleName || "Brak roli"}</td>
                   <td>
                     <div className={styles.actionButtons}>
-                      {/* DYNAMICZNY PRZYCISK EDYCJI */}
                       <button className={styles.actionBtn} onClick={() => handleEditClick(user.userId)}>
                          <Image src="/edit.svg" alt="Edit" width={22} height={22}/>
                       </button>
-                      <button className={styles.actionBtn}><Image src="/delete.svg" alt="Delete" width={22} height={22}/></button>
+                      <button className={styles.actionBtn} onClick={() => handleToggleLock(user.userId, user.isLocked)}>
+                        <Image src="/delete.svg" alt="Toggle Lock" width={22} height={22} 
+                              style={{ opacity: user.isLocked ? 0.5 : 1 }}
+                        />
+                      </button>
                     </div>
                   </td>
                 </tr>
