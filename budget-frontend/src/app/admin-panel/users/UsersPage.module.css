@@ -183,3 +183,179 @@
   color: #EAC278;
   font-weight: 500;
 }
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  width: 637px;
+  height: 838px;
+  background: #1F2330;
+  border-radius: 15px;
+  position: relative;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  overflow-y: auto;
+}
+
+.closeButton {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  width: 18px;
+  height: 18px;
+  transform: rotate(-90deg);
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.formTitle {
+  width: 458px;
+  color: #FFF;
+  text-align: center;
+  font-family: "Baloo 2", cursive;
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 40px;
+}
+
+.formGroup {
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.stepHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  width: 437px;
+}
+
+.stepCircle {
+  width: 37px;
+  height: 37px;
+  background: #272C3C;
+  border-radius: 50%;
+  color: #EAC278;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Afacad', sans-serif;
+  font-size: 21.926px;
+  font-weight: 700;
+}
+
+.inputLabel {
+  color: #FFF;
+  font-family: 'Afacad', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.inputField {
+  width: 437px;
+  height: 36.99px;
+  border-radius: 9.394px;
+  background: #F3F3F3;
+  border: none;
+  padding: 0 15px;
+  color: #6D6D6D;
+  font-family: 'Afacad', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.roleSelection {
+  display: flex;
+  gap: 20px;
+  width: 437px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.roleBtn {
+  cursor: pointer;
+  background: none;
+  border: 2px solid transparent; 
+  padding: 10px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+
+.roleBtnActive {
+  background: rgba(39, 44, 60, 0.5); 
+  border-bottom: 2px solid #EAC278; 
+}
+
+.roleTextStandard {
+  width: 252px;
+  color: #FFF;
+  text-align: center;
+  font-family: "Baloo 2", cursive;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+
+.roleTextAdmin {
+  width: 173.726px;
+  color: #4B5163; 
+  text-align: center;
+  font-family: "Baloo 2", cursive;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: normal;
+  transition: color 0.2s;
+}
+
+.roleBtnActive .roleTextAdmin {
+  color: #EAC278;
+}
+
+.roleTextAdmin.active {
+    color: #EAC278;
+}
+
+.submitBtn {
+  width: 276px;
+  height: 48px;
+  border-radius: 9.394px;
+  background: #272C3C;
+  color: #FFF;
+  text-align: center;
+  font-family: 'Afacad', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: opacity 0.2s;
+}
+
+.submitBtn:hover {
+  opacity: 0.9;
+}
