@@ -1006,3 +1006,8 @@
         background: #4B526B;
         transform: translateY(-2px);
     }
+
+.adminNavLink {
+    color: #EAC278;
+    font-weight: 600;
+}

@@ -49,6 +49,7 @@ function DashboardPage() {
     const router = useRouter();
 
     const [authChecked, setAuthChecked] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
@@ -189,7 +190,7 @@ function DashboardPage() {
             const fetchUser = async () => {
                 try {
                     const res = await fetch(`${apiUrl}/api/authentication/me`, {
-                        headers: { "Authorization": `Bearer ${token}` }
+                        headers: { Authorization: `Bearer ${token}` }
                     });
                     if (res.ok) {
                         const data: UserResponse = await res.json();
@@ -200,10 +201,37 @@ function DashboardPage() {
                 }
             };
 
+            const checkAdmin = async () => {
+                try {
+                    const res = await fetch(`${apiUrl}/api/adminPanel/users/roles`, {
+                        method: "GET",
+                        headers: { Authorization: `Bearer ${token}` },
+                        cache: "no-store",
+                    });
+
+                    if (res.status === 401) {
+                        localStorage.removeItem("authToken");
+                        router.replace("/landing-page");
+                        return;
+                    }
+
+                    if (res.status === 403) {
+                        setIsAdmin(false);
+                        return;
+                    }
+
+                    setIsAdmin(res.ok);
+                } catch {
+                    setIsAdmin(false);
+                }
+            };
+
             await Promise.all([
                 fetchUser(),
+                checkAdmin(),
                 refreshBudgetsList()
             ]);
+
         };
 
         fetchInitialData();
@@ -637,6 +665,14 @@ function DashboardPage() {
                 </div>
 
                 <nav className={styles.nav}>
+                    {isAdmin && (
+                        <Link
+                            href="/admin-panel"
+                            className={`${styles.navLink} ${styles.adminNavLink}`}
+                        >
+                            Admin panel
+                        </Link>
+                    )}
                     <Link href="/tips" className={styles.navLink}>
                         Porady finansowe
                     </Link>
