@@ -255,6 +255,16 @@ function DashboardPage() {
         return () => document.removeEventListener("mousedown", onMouseDown);
     }, [isBudgetMenuOpen]);
 
+    useEffect(() => {
+        if (!selectedBudgetId) return;
+        localStorage.setItem("selectedBudgetId", String(selectedBudgetId));
+
+        const b = budgets.find(x => x.id === selectedBudgetId);
+        const name = b?.name ?? "";
+        if (name) localStorage.setItem("selectedBudgetName", name);
+    }, [selectedBudgetId, budgets]);
+
+
     const { totalIncome, totalExpenses } = rawData.reduce(
         (acc, curr) => {
             const amount = Number(curr.amount) || 0; 
