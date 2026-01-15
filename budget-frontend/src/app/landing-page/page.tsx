@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import styles from "./Landing.module.css";
-import dashboardStyles from "../budget-settings/BudgetSettings.module.css";
+import dashboardStyles from "../dashboard/Dashboard.module.css";
 
 function LandingPage() {
     const router = useRouter();

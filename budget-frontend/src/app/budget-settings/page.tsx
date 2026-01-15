@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import styles from "./BudgetSettings.module.css";
-import dashboardStyles from "../budget-settings/BudgetSettings.module.css";
+import dashboardStyles from "../dashboard/Dashboard.module.css";
 
 export default function BudgetTeam() {
     const router = useRouter();
