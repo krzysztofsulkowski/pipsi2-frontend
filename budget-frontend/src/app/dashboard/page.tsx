@@ -103,6 +103,14 @@ function DashboardPage() {
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
+    const isArchivedBudget = (b: any) => {
+        const v = b?.isArchived ?? b?.archived;
+        if (typeof v === "boolean") return v;
+
+        const s = typeof b?.status === "string" ? b.status.toLowerCase() : "";
+        return s.includes("arch");
+    };
+
     const refreshBudgetsList = async () => {
         setBudgetsLoading(true);
         try {
@@ -128,14 +136,18 @@ function DashboardPage() {
                 if (Array.isArray(data)) budgetsArray = data;
                 else if (data?.data && Array.isArray(data.data)) budgetsArray = data.data;
 
-                setBudgets(budgetsArray);
+                const activeBudgets = budgetsArray.filter(b => !isArchivedBudget(b));
 
-                if (budgetsArray.length > 0) {
-                    const currentIdValid = selectedBudgetId && budgetsArray.some(b => b.id === selectedBudgetId);
-                    if (!currentIdValid) setSelectedBudgetId(budgetsArray[0].id);
+                setBudgets(activeBudgets);
+
+                if (activeBudgets.length > 0) {
+                    const currentIdValid = selectedBudgetId && activeBudgets.some(b => b.id === selectedBudgetId);
+                    if (!currentIdValid) setSelectedBudgetId(activeBudgets[0].id);
                 } else {
+                    setSelectedBudgetId(null);
                     setLoading(false);
                 }
+
             } else {
                 setBudgets([]);
             }
@@ -239,8 +251,11 @@ function DashboardPage() {
 
     useEffect(() => {
         if (!selectedBudgetId) return;
+        if (!budgets.some(b => b.id === selectedBudgetId)) return;
+
         refreshStats(selectedBudgetId, selectedYear, selectedMonth);
-    }, [selectedYear, selectedMonth, selectedBudgetId]);
+    }, [selectedYear, selectedMonth, selectedBudgetId, budgets]);
+
 
     useEffect(() => {
         const onMouseDown = (e: MouseEvent) => {
