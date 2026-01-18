@@ -144,6 +144,16 @@ export default function PlannedExpencesPage() {
 
     const currentBudget = useMemo(() => budgets.find((b) => b.id === selectedBudgetId) ?? null, [budgets, selectedBudgetId]);
 
+    const goDashboardFromBreadcrumb = () => {
+        const id = selectedBudgetId ?? null;
+
+        if (id !== null) localStorage.setItem("selectedBudgetId", String(id));
+        if (currentBudget?.name) localStorage.setItem("selectedBudgetName", currentBudget.name);
+
+        router.push("/dashboard");
+    };
+
+
     const isArchivedBudget = (b: Budget) => {
         const maybeArchived = (b as unknown as { isArchived?: boolean; archived?: boolean; status?: string }).isArchived;
         const maybeArchived2 = (b as unknown as { isArchived?: boolean; archived?: boolean; status?: string }).archived;
@@ -758,15 +768,23 @@ export default function PlannedExpencesPage() {
                         <div className={dashboardStyles.greetingUnderline} />
                     </section>
 
-                    <div className={styles.breadcrumbsContainer}>
-                        <span className={styles.crumbLink}>
-                            <Link href="/dashboard" className={styles.crumbLinkAnchor}>
-                                Dashboard
-                            </Link>
-                        </span>
+                    <div className={styles.breadcrumbsContainer} aria-label="Breadcrumb">
+                        <button
+                            type="button"
+                            className={styles.crumbLinkButton}
+                            onClick={goDashboardFromBreadcrumb}
+                        >
+                            Dashboard
+                        </button>
+
                         <span className={styles.crumbSep}>&gt;</span>
-                        <span className={styles.crumbActive}>Planowane wydatki</span>
+
+                        <span className={styles.crumbActive} aria-current="page">
+                            Planowane wydatki
+                        </span>
                     </div>
+
+
 
                     {!loadingNotifications && notifications.length > 0 && (
                         <div className={styles.notificationsWrap}>

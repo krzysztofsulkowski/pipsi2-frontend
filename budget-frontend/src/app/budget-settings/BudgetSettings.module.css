@@ -68,6 +68,21 @@
     color: #EAC278;
 }
 
+.crumbLinkButton {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
+}
+
+    .crumbLinkButton:hover {
+        text-decoration: underline;
+    }
+
+
 .actionCardRow {
     margin: 14px 4px 16px;
 }

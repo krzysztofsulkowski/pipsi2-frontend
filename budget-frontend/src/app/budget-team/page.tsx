@@ -80,6 +80,12 @@ export default function BudgetTeam() {
         router.push("/login");
     };
 
+    const goDashboardFromBreadcrumb = () => {
+        if (selectedBudgetId !== null) localStorage.setItem("selectedBudgetId", String(selectedBudgetId));
+        if (selectedBudgetName && selectedBudgetName.trim()) localStorage.setItem("selectedBudgetName", selectedBudgetName.trim());
+        router.push("/dashboard");
+    };
+
     const formatDatePL = (d: string | null) => {
         if (!d) return "-";
         const dt = new Date(d);
@@ -383,12 +389,22 @@ export default function BudgetTeam() {
                         </h1>
                         <div className={styles.heroUnderline} />
                     </section>
+                    <div className={styles.breadcrumbsContainer} aria-label="Breadcrumb">
+                        <button
+                            type="button"
+                            className={styles.crumbLinkButton}
+                            onClick={goDashboardFromBreadcrumb}
+                        >
+                            Dashboard
+                        </button>
 
-                    <div className={styles.breadcrumbsContainer}>
-                        <span className={styles.crumbLink}>Dashboard</span>
                         <span className={styles.crumbSep}>&gt;</span>
-                        <span className={styles.crumbActive}>Członkowie budżetu</span>
+
+                        <span className={styles.crumbActive} aria-current="page">
+                            Członkowie budżetu
+                        </span>
                     </div>
+
 
                     <div className={styles.actionCardRow}>
                         <button type="button" className={styles.addMemberCard} onClick={openInviteModal}>

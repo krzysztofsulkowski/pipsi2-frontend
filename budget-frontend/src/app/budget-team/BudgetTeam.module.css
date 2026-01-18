@@ -62,6 +62,20 @@
     font-family: var(--font-afacad);
     font-size: 14px;
 }
+.crumbLinkButton {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    text-decoration: none;
+}
+
+    .crumbLinkButton:hover {
+        text-decoration: underline;
+    }
+
 
 .crumbLink {
     color: #C9CCD6;

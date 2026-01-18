@@ -69,6 +69,11 @@ export default function BudgetSettingsPage() {
         router.push("/login");
     };
 
+    const goDashboardFromBreadcrumb = () => {
+        router.push("/dashboard");
+    };
+
+
     const formatDatePL = (d: any) => {
         if (!d) return "-";
         const dt = new Date(d);
@@ -466,10 +471,20 @@ export default function BudgetSettingsPage() {
                         <div className={styles.heroUnderline} />
                     </section>
 
-                    <div className={styles.breadcrumbsContainer}>
-                        <span className={styles.crumbLink}>Dashboard</span>
+                    <div className={styles.breadcrumbsContainer} aria-label="Breadcrumb">
+                        <button
+                            type="button"
+                            className={styles.crumbLinkButton}
+                            onClick={goDashboardFromBreadcrumb}
+                        >
+                            Dashboard
+                        </button>
+
                         <span className={styles.crumbSep}>&gt;</span>
-                        <span className={styles.crumbActive}>Ustawienia budżetów</span>
+
+                        <span className={styles.crumbActive} aria-current="page">
+                            Ustawienia budżetów
+                        </span>
                     </div>
 
                     <div className={styles.actionCardRow}>
