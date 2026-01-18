@@ -10,7 +10,7 @@ function LoginForm() {
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-    const router = useRouter(); 
+    const router = useRouter();
     const searchParams = useSearchParams();
     const externalAuthError = searchParams.get('error');
 
@@ -48,7 +48,7 @@ function LoginForm() {
 
             if (data.token) {
                 localStorage.setItem('authToken', data.token);
-                router.push('/dashboard'); 
+                router.push('/dashboard');
             } else {
                 throw new Error("Brak tokenu w odpowiedzi serwera.");
             }
@@ -62,7 +62,7 @@ function LoginForm() {
         }
     };
 
-     const handleExternalLogin = (provider: 'Facebook' | 'Google') => {
+    const handleExternalLogin = (provider: 'Facebook') => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
         if (!apiUrl) {
@@ -70,7 +70,7 @@ function LoginForm() {
             return;
         }
 
-        const returnUrl = `${window.location.origin}/auth/callback`;        
+        const returnUrl = `${window.location.origin}/auth/callback`;
         const externalLoginUrl = `${apiUrl}/api/authentication/external-login?provider=${provider}&returnUrl=${encodeURIComponent(returnUrl)}`;
         window.location.href = externalLoginUrl;
     };
@@ -80,7 +80,7 @@ function LoginForm() {
             <div className={styles.container}>
                 <section className={styles.leftPanel}>
                     <div className={styles.logoWrapper}>
-                        <img src="/logo.svg" alt="Logo aplikacji" className={styles.logoImage}/>
+                        <img src="/logo.svg" alt="Logo aplikacji" className={styles.logoImage} />
                         <div className={styles.logoSubtitle}>
                             Zachowaj równowagę w domowym budżecie
                         </div>
@@ -132,11 +132,11 @@ function LoginForm() {
                                 <span className={styles.dividerLine} />
                             </div>
 
-                            <button type="button" className={`${styles.socialButton} ${styles.socialGoogle}`}>
-                                Zaloguj się przez Google
-                            </button>
-
-                            <button type="button" className={`${styles.socialButton} ${styles.socialFacebook}`} onClick={() => handleExternalLogin('Facebook')}>
+                            <button
+                                type="button"
+                                className={`${styles.socialButton} ${styles.socialFacebook}`}
+                                onClick={() => handleExternalLogin('Facebook')}
+                            >
                                 Zaloguj się przez Facebook
                             </button>
                         </form>
@@ -160,7 +160,6 @@ function LoginForm() {
 export default function LoginPage() {
     return (
         <main className={styles.page}>
-            {}
             <Suspense fallback={<div className={styles.container}>Ładowanie formularza...</div>}>
                 <LoginForm />
             </Suspense>
