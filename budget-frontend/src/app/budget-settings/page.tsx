@@ -374,9 +374,12 @@ export default function BudgetSettingsPage() {
         }
     };
 
-    const goMembers = (budgetId: number) => {
-        router.push(`/budget-team?budgetId=${encodeURIComponent(String(budgetId))}`);
+    const goMembers = (b: BudgetRow) => {
+        localStorage.setItem("selectedBudgetId", String(b.id));
+        localStorage.setItem("selectedBudgetName", b.name || "Wybrany budżet");
+        router.push("/budget-team");
     };
+
 
     const openCreateBudget = () => {
         router.push("/dashboard");
@@ -547,7 +550,7 @@ export default function BudgetSettingsPage() {
                                                     <button
                                                         type="button"
                                                         className={styles.optionButton}
-                                                        onClick={() => goMembers(b.id)}
+                                                        onClick={() => goMembers(b)}
                                                     >
                                                         <Image src="/group.svg" alt="Członkowie" width={16} height={16} />
                                                     </button>
