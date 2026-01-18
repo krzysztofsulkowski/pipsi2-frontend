@@ -29,6 +29,11 @@ interface InviteRequestBody {
     budgetId: number;
 }
 
+interface MemberToRemove {
+    id: string;
+    label: string;
+}
+
 export default function BudgetTeam() {
     const router = useRouter();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
@@ -48,6 +53,10 @@ export default function BudgetTeam() {
     const [mounted, setMounted] = useState(false);
     const [selectedBudgetId, setSelectedBudgetId] = useState<number | null>(null);
     const [selectedBudgetName, setSelectedBudgetName] = useState("Wybrany budżet");
+
+    const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
+    const [memberToRemove, setMemberToRemove] = useState<MemberToRemove | null>(null);
+    const [removingMember, setRemovingMember] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -108,17 +117,23 @@ export default function BudgetTeam() {
 
             const raw = await res.json();
 
-            const mapped: BudgetMemberRow[] = raw.map((x: any) => ({
-                id: x.userId ?? "",
-                userName: x.user ?? null,
-                email: typeof x.user === "string" && x.user.includes("@") ? x.user : "",
-                addedAt: x.date ?? null,
+            const source = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+
+            const mapped: BudgetMemberRow[] = source.map((x: any) => ({
+                id: x.userId ?? x.id ?? "",
+                userName: x.user ?? x.userName ?? null,
+                email:
+                    typeof x.user === "string" && x.user.includes("@")
+                        ? x.user
+                        : typeof x.email === "string"
+                            ? x.email
+                            : "",
+                addedAt: x.date ?? x.addedAt ?? x.joinedAt ?? null,
                 role: x.role ?? "",
-                status: x.status ?? ""
+                status: x.status ?? "",
             }));
 
             setMembers(mapped);
-
         } catch {
             setMembers([]);
             showToast("error", "Wystąpił błąd podczas pobierania danych.");
@@ -212,6 +227,78 @@ export default function BudgetTeam() {
             setSendingInvite(false);
         }
     };
+
+    const openRemoveModal = (m: BudgetMemberRow) => {
+        if (!m.id) {
+            showToast("error", "Nie można usunąć tego wpisu (brak ID użytkownika).");
+            return;
+        }
+
+        const label =
+            m.userName && m.userName.trim()
+                ? m.userName
+                : m.email && m.email.trim()
+                    ? m.email
+                    : "ten użytkownik";
+
+        setMemberToRemove({ id: m.id, label });
+        setIsRemoveModalOpen(true);
+    };
+
+
+    const closeRemoveModal = () => {
+        setIsRemoveModalOpen(false);
+        setMemberToRemove(null);
+    };
+
+    const removeMember = async () => {
+        if (!selectedBudgetId) {
+            showToast("error", "Brak wybranego budżetu.");
+            return;
+        }
+
+        if (!memberToRemove?.id) {
+            showToast("error", "Brak ID użytkownika do usunięcia.");
+            return;
+        }
+
+        setRemovingMember(true);
+        try {
+            const token = localStorage.getItem("authToken");
+            if (!token) {
+                router.replace("/login");
+                return;
+            }
+
+            const res = await fetch(
+                `${apiUrl}/api/budget/${selectedBudgetId}/members/${encodeURIComponent(memberToRemove.id)}`,
+                {
+                    method: "DELETE",
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            if (res.status === 401) {
+                localStorage.removeItem("authToken");
+                router.replace("/login");
+                return;
+            }
+
+            if (!res.ok) {
+                showToast("error", "Nie udało się usunąć członka budżetu.");
+                return;
+            }
+
+            closeRemoveModal();
+            showToast("success", "Członek budżetu został usunięty.");
+            await fetchMembers(selectedBudgetId);
+        } catch {
+            showToast("error", "Wystąpił błąd podczas usuwania członka budżetu.");
+        } finally {
+            setRemovingMember(false);
+        }
+    };
+
 
     return (
         <div className={dashboardStyles.page}>
@@ -346,14 +433,16 @@ export default function BudgetTeam() {
                                         return (
                                             <tr key={rowKey}>
                                                 <td>{idx + 1}</td>
-                                                <td>
-                                                    {m.userName && m.userName.trim() ? m.userName : m.email}
-                                                </td>
+                                                <td>{m.userName && m.userName.trim() ? m.userName : m.email}</td>
                                                 <td>{formatDatePL(m.addedAt)}</td>
                                                 <td>{m.role}</td>
                                                 <td>{m.status}</td>
                                                 <td className={styles.optionsCell}>
-                                                    <button type="button" className={styles.trashButton} disabled>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.trashButton}
+                                                        onClick={() => openRemoveModal(m)}
+                                                    >
                                                         <Image src="/trash.svg" alt="Usuń" width={16} height={16} />
                                                     </button>
                                                 </td>
@@ -400,6 +489,49 @@ export default function BudgetTeam() {
                     </div>
                 </div>
             )}
+
+            {isRemoveModalOpen && (
+                <div className={styles.modalOverlay} role="dialog" aria-modal="true">
+                    <div className={styles.modal}>
+                        <div className={styles.modalHeaderRow}>
+                            <h2 className={styles.modalTitle}>USUŃ CZŁONKA BUDŻETU</h2>
+                            <button type="button" className={styles.modalCloseButton} onClick={closeRemoveModal}>
+                                ×
+                            </button>
+                        </div>
+
+                        <div className={styles.removeBody}>
+                            <p className={styles.removeText}>
+                                Czy na pewno chcesz usunąć:{" "}
+                                <span className={styles.removeHighlight}>{memberToRemove?.label}</span>?
+                            </p>
+                        </div>
+
+                        <div className={styles.modalActions}>
+                            <button
+                                type="button"
+                                className={`${styles.modalButton} ${styles.modalSecondaryButton}`}
+                                onClick={closeRemoveModal}
+                                disabled={removingMember}
+                            >
+                                ANULUJ
+                            </button>
+
+                            <button
+                                type="button"
+                                className={`${styles.modalButton} ${styles.modalPrimaryButton}`}
+                                onClick={removeMember}
+                                disabled={removingMember}
+                            >
+                                {removingMember ? "USUWANIE..." : "USUŃ"}
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            )}
+
+
         </div>
     );
 }
