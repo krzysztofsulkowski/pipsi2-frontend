@@ -8,9 +8,9 @@ interface BackendErrorResponse {
     type?: string;
     title?: string;
     status?: number;
-    detail?: string;  
+    detail?: string;
     errors?: {
-        Model?: string[]; 
+        Model?: string[];
     };
 }
 
@@ -104,14 +104,13 @@ export default function RegisterPage() {
         if (!confirmPassword) {
             setConfirmPasswordError("To pole jest wymagane.");
             hasError = true;
-        } else if (password && confirmPassword && password !== confirmPassword) {
+        } else if (password !== confirmPassword) {
             setConfirmPasswordError("Hasła nie są identyczne.");
             hasError = true;
         }
 
         return !hasError;
     };
-
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
@@ -125,8 +124,7 @@ export default function RegisterPage() {
             return;
         }
 
-        const isValid = validateForm();
-        if (!isValid) return;
+        if (!validateForm()) return;
 
         try {
             const response = await fetch(`${apiUrl}/api/authentication/register`, {
@@ -172,7 +170,7 @@ export default function RegisterPage() {
         }
     };
 
-    const handleExternalLogin = (provider: 'Facebook' | 'Google') => {
+    const handleExternalLogin = (provider: 'Facebook') => {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
         if (!apiUrl) {
@@ -263,14 +261,6 @@ export default function RegisterPage() {
                                 <span className={styles.dividerText}>lub</span>
                                 <span className={styles.dividerLine} />
                             </div>
-
-                            <button
-                                type="button"
-                                className={`${styles.socialButton} ${styles.socialGoogle}`}
-                                onClick={() => handleExternalLogin('Google')}
-                            >
-                                Zarejestruj się przez Google
-                            </button>
 
                             <button
                                 type="button"
