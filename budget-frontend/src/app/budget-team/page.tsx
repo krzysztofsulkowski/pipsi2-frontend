@@ -106,9 +106,19 @@ export default function BudgetTeam() {
                 return;
             }
 
-            const data = (await res.json()) as BudgetMemberRow[] | { data?: BudgetMemberRow[] };
-            const arr = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
-            setMembers(arr);
+            const raw = await res.json();
+
+            const mapped: BudgetMemberRow[] = raw.map((x: any) => ({
+                id: x.userId ?? "",
+                userName: x.user ?? null,
+                email: typeof x.user === "string" && x.user.includes("@") ? x.user : "",
+                addedAt: x.date ?? null,
+                role: x.role ?? "",
+                status: x.status ?? ""
+            }));
+
+            setMembers(mapped);
+
         } catch {
             setMembers([]);
             showToast("error", "Wystąpił błąd podczas pobierania danych.");
