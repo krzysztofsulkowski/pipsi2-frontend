@@ -267,13 +267,15 @@
     display: flex;
     gap: 20px;
     align-items: stretch;
+    width: 100%;
 }
+
 
 .rightTiles {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    min-width: 220px;
+    flex: 1;
 }
 
 

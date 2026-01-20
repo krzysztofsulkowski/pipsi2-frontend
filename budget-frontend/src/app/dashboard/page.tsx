@@ -67,12 +67,19 @@ function DashboardPage() {
 
     const [selectedBudgetId, setSelectedBudgetId] = useState<number | null>(null);
 
+    const [savings, setSavings] = useState(0);
+    const [savingsLoading, setSavingsLoading] = useState(false);
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newBudgetName, setNewBudgetName] = useState("");
     const [createError, setCreateError] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
 
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+    const handleGoToSettings = () => {
+        setIsProfileMenuOpen(false);
+        router.push("/settings");
+    };
 
     const [isBudgetMenuOpen, setIsBudgetMenuOpen] = useState(false);
     const budgetMenuRef = useRef<HTMLDivElement | null>(null);
@@ -189,6 +196,28 @@ function DashboardPage() {
     };
 
 
+    const fetchStatsForMonth = async (budgetId: number, year: number, month: number) => {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            router.replace("/landing-page");
+            return [] as Transaction[];
+        }
+
+        const url = `${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`;
+        const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+
+        if (res.status === 401) {
+            localStorage.removeItem("authToken");
+            router.replace("/landing-page");
+            return [] as Transaction[];
+        }
+
+        if (!res.ok) return [] as Transaction[];
+
+        const data = await res.json() as Transaction[];
+        return Array.isArray(data) ? data : ([] as Transaction[]);
+    };
+
     useEffect(() => {
         const fetchInitialData = async () => {
             const token = localStorage.getItem("authToken");
@@ -254,7 +283,9 @@ function DashboardPage() {
         if (!budgets.some(b => b.id === selectedBudgetId)) return;
 
         refreshStats(selectedBudgetId, selectedYear, selectedMonth);
+        computeSavings(selectedBudgetId, selectedYear, selectedMonth);
     }, [selectedYear, selectedMonth, selectedBudgetId, budgets]);
+
 
 
     useEffect(() => {
@@ -319,6 +350,44 @@ function DashboardPage() {
         const n = Number(amount);
         const val = Number.isFinite(n) ? Math.abs(n) : 0;
         return val.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    const computeBalanceFromTransactions = (tx: Transaction[]) => {
+        return tx.reduce((acc, curr) => {
+            const amount = Number(curr.amount) || 0;
+            if (curr.type === 0) return acc + amount;
+            if (curr.type === 1) return acc - amount;
+            return acc;
+        }, 0);
+    };
+
+    const computeSavings = async (budgetId: number, year: number, month: number) => {
+        setSavingsLoading(true);
+        try {
+            const years = [2024, 2025, 2026];
+
+            let sum = 0;
+
+            if (month === 0) {
+                const prevYears = years.filter(y => y < year);
+                for (const y of prevYears) {
+                    const monthPromises = Array.from({ length: 12 }, (_, i) => fetchStatsForMonth(budgetId, y, i + 1));
+                    const results = await Promise.all(monthPromises);
+                    for (const tx of results) sum += computeBalanceFromTransactions(tx);
+                }
+            } else {
+                const monthsToSum = Array.from({ length: Math.max(0, month - 1) }, (_, i) => i + 1);
+                const results = await Promise.all(monthsToSum.map(m => fetchStatsForMonth(budgetId, year, m)));
+                for (const tx of results) sum += computeBalanceFromTransactions(tx);
+            }
+
+            setSavings(sum);
+        } catch (e) {
+            console.error("Błąd liczenia oszczędności", e);
+            setSavings(0);
+        } finally {
+            setSavingsLoading(false);
+        }
     };
 
 
@@ -627,6 +696,7 @@ function DashboardPage() {
         } finally {
             setIsExpenseSaving(false);
         }
+
     };
 
     if (!authChecked) return null;
@@ -729,7 +799,7 @@ function DashboardPage() {
                                 <button
                                     type="button"
                                     className={styles.profileDropdownItem}
-                                    onClick={() => setIsProfileMenuOpen(false)}
+                                    onClick={handleGoToSettings}
                                 >
                                     Ustawienia
                                 </button>
@@ -962,9 +1032,9 @@ function DashboardPage() {
                                         </p>
                                     </div>
                                 <div className={styles.cardValue}>
-                                    <span className={styles.cardValueNumber}>
-                                        {loading ? "--,--" : "0.00"}
-                                    </span>
+                                                    <span className={styles.cardValueNumber}>
+                                                        {savingsLoading ? "--,--" : savings.toFixed(2)}
+                                                    </span>
                                     <span className={styles.cardValueCurrency}>
                                         {currencySymbol}
                                     </span>
