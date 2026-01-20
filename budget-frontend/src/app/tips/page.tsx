@@ -143,7 +143,148 @@ export default function TipsPage() {
                     <div className={dashboardStyles.greetingUnderline} />
                 </div>
 
-                <section className={styles.contentWrapper}></section>
+                <section className={styles.contentWrapper}>
+                    <div className={styles.articleTop}>
+                        <p className={styles.lead}>
+                            Zarządzanie finansami nie musi być skomplikowane.
+                            Wystarczy kilka podstawowych zasad, które pomagają uporządkować wydatki i lepiej planować codzienne decyzje.
+                        </p>
+
+                        <div className={styles.quoteBox}>
+                            <p className={styles.quoteText}>
+                                „Nie chodzi o to, żeby mieć więcej pieniędzy. Chodzi o to, żeby lepiej nimi zarządzać.”
+                            </p>
+                        </div>
+                    </div>
+
+                    <section className={styles.gridWrapper}>
+                        <div className={styles.cardsGrid}>
+                            <div className={styles.card}>
+                                <div className={styles.questionSection}>
+                                    <h2 className={styles.questionText}>Wydawaj mniej niż zarabiasz</h2>
+                                </div>
+                                <div className={styles.answerSection}>
+                                    <p className={styles.answerText}>
+                                        Jeśli miesiąc w miesiąc bilans jest na minusie, to nawet małe kwoty z czasem robią
+                                        duży problem. Najpierw domknij podstawy, potem dopiero „ulepszaj” budżet.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.card}>
+                                <div className={styles.questionSection}>
+                                    <h2 className={styles.questionText}>Rób prosty budżet</h2>
+                                </div>
+                                <div className={styles.answerSection}>
+                                    <p className={styles.answerText}>
+                                        Podziel pieniądze na: opłaty stałe, codzienne życie i „przyjemności”.
+                                        Nawet prosty podział ogranicza impulsy i ułatwia decyzje.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.card}>
+                                <div className={styles.questionSection}>
+                                    <h2 className={styles.questionText}>Poduszka finansowa</h2>
+                                </div>
+                                <div className={styles.answerSection}>
+                                    <p className={styles.answerText}>
+                                        Odkładaj regularnie, nawet małe kwoty. Celem są oszczędności pozwalające przetrwać
+                                        kilka miesięcy bez dochodu lub w razie nagłego wydatku.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.card}>
+                                <div className={styles.questionSection}>
+                                    <h2 className={styles.questionText}>Uważaj na „drobne” wydatki</h2>
+                                </div>
+                                <div className={styles.answerSection}>
+                                    <p className={styles.answerText}>
+                                        Małe zakupy powtarzane często potrafią zjadać budżet. Raz w tygodniu rzuć okiem
+                                        na historię transakcji i zobacz, co realnie się nazbierało.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.card}>
+                                <div className={styles.questionSection}>
+                                    <h2 className={styles.questionText}>Unikaj impulsywnych zakupów</h2>
+                                </div>
+                                <div className={styles.answerSection}>
+                                    <p className={styles.answerText}>
+                                        Zastosuj zasadę „odczekaj”: jeśli to nie jest pilna potrzeba, wróć do tematu
+                                        następnego dnia. Bardzo często ochota mija.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.card}>
+                                <div className={styles.questionSection}>
+                                    <h2 className={styles.questionText}>Ogranicz długi konsumpcyjne</h2>
+                                </div>
+                                <div className={styles.answerSection}>
+                                    <p className={styles.answerText}>
+                                        Unikaj kupowania „bo teraz”, jeśli będziesz to spłacać długo później.
+                                        Zadłużenie na zachcianki szybko blokuje swobodę finansową.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.card}>
+                                <div className={styles.questionSection}>
+                                    <h2 className={styles.questionText}>Automatyzuj oszczędzanie</h2>
+                                </div>
+                                <div className={styles.answerSection}>
+                                    <p className={styles.answerText}>
+                                        Najłatwiej oszczędzać, gdy decyzja dzieje się „z automatu”.
+                                        Ustal stałą kwotę po wypłacie i traktuj ją jak rachunek do opłacenia.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.card}>
+                                <div className={styles.questionSection}>
+                                    <h2 className={styles.questionText}>Pilnuj stałych kosztów</h2>
+                                </div>
+                                <div className={styles.answerSection}>
+                                    <p className={styles.answerText}>
+                                        Subskrypcje, pakiety, prowizje, opłaty „co miesiąc” — to często pieniądze,
+                                        które uciekają bez bólu. Raz na jakiś czas zrób przegląd i tnij zbędne.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={styles.card}>
+                                <div className={styles.questionSection}>
+                                    <h2 className={styles.questionText}>Regularnie rób podsumowania</h2>
+                                </div>
+                                <div className={styles.answerSection}>
+                                    <p className={styles.answerText}>
+                                        Ustal prosty rytm: raz w tygodniu szybki przegląd, raz w miesiącu większe
+                                        podsumowanie. Bez oceniania się — tylko fakty i decyzje na kolejny miesiąc.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div className={styles.articleBottom}>
+                        <h2 className={styles.bottomTitle}>Mały plan na start</h2>
+
+                        <div className={styles.callout}>
+                            <ul className={styles.stepsList}>
+                                <li className={styles.stepItem}>Zrób 7 dni obserwacji wydatków bez zmian w zachowaniu.</li>
+                                <li className={styles.stepItem}>Wybierz 1 rzecz do ograniczenia (najłatwiejszą).</li>
+                                <li className={styles.stepItem}>Ustal stałą kwotę oszczędzania i trzymaj ją przez miesiąc.</li>
+                                <li className={styles.stepItem}>Na koniec miesiąca sprawdź: co działało, co nie i dlaczego.</li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </section>
+
+
             </main>
         </div>
     );
