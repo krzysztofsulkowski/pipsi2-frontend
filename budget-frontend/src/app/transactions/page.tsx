@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./TransactionHistory.module.css";
 import { Transaction, Budget, mapPaymentMethodIdToName } from "@/types";
@@ -12,6 +11,17 @@ interface ApiResponseWrapper<T> {
     data: T;
 }
 
+type TransactionRow = Transaction & {
+    id?: string | number;
+    date?: string | Date;
+    type?: number;
+    categoryName?: string | null;
+    title?: string | null;
+    paymentMethod?: number;
+    amount?: number | string;
+    userName?: string | null;
+};
+
 export default function TransactionHistoryPage() {
     const router = useRouter();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
@@ -21,8 +31,12 @@ export default function TransactionHistoryPage() {
     const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [selectedBudgetId, setSelectedBudgetId] = useState<number | null>(null);
-    const [rawData, setRawData] = useState<Transaction[]>([]);
+
+    const [rawData, setRawData] = useState<TransactionRow[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const [savings, setSavings] = useState(0);
+    const [savingsLoading, setSavingsLoading] = useState(false);
 
     const goDashboardFromBreadcrumb = () => {
         router.push("/dashboard");
@@ -30,7 +44,7 @@ export default function TransactionHistoryPage() {
 
     useEffect(() => {
         const raw = localStorage.getItem("selectedBudgetId");
-        const n = raw ? Number(raw) : NaN;
+        const n = raw ? Number(raw) : Number.NaN;
         if (Number.isFinite(n)) setSelectedBudgetId(n);
     }, []);
 
@@ -46,12 +60,12 @@ export default function TransactionHistoryPage() {
 
             if (res.ok) {
                 const data = (await res.json()) as Budget[] | ApiResponseWrapper<Budget[]>;
-                const list = Array.isArray(data) ? data : Array.isArray((data as any)?.data) ? (data as any).data : [];
+                const list = Array.isArray(data) ? data : Array.isArray((data as ApiResponseWrapper<Budget[]>)?.data) ? (data as ApiResponseWrapper<Budget[]>).data : [];
                 setBudgets(list);
 
                 if (list.length > 0 && selectedBudgetId === null) {
-                    const raw = localStorage.getItem("selectedBudgetId");
-                    const stored = raw ? Number(raw) : NaN;
+                    const rawId = localStorage.getItem("selectedBudgetId");
+                    const stored = rawId ? Number(rawId) : Number.NaN;
                     const nextId = Number.isFinite(stored) && list.some((b) => b.id === stored) ? stored : list[0].id;
                     setSelectedBudgetId(nextId);
                 }
@@ -67,20 +81,62 @@ export default function TransactionHistoryPage() {
             const token = localStorage.getItem("authToken");
             if (!token) return;
 
-            const res = await fetch(
-                `${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`,
-                { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
-            );
+            const res = await fetch(`${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                cache: "no-store",
+            });
 
             if (res.ok) {
-                const json = (await res.json()) as any;
-                const arr = Array.isArray(json) ? json : Array.isArray(json?.data) ? json.data : [];
+                const json = (await res.json()) as TransactionRow[] | ApiResponseWrapper<TransactionRow[]>;
+                const arr = Array.isArray(json) ? json : Array.isArray((json as ApiResponseWrapper<TransactionRow[]>)?.data) ? (json as ApiResponseWrapper<TransactionRow[]>).data : [];
                 setRawData(arr);
             } else {
                 setRawData([]);
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchStatsForMonth = async (budgetId: number, year: number, month: number) => {
+        const token = localStorage.getItem("authToken");
+        if (!token) return [] as TransactionRow[];
+
+        const res = await fetch(`${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+            cache: "no-store",
+        });
+
+        if (!res.ok) return [] as TransactionRow[];
+
+        const json = (await res.json()) as TransactionRow[] | ApiResponseWrapper<TransactionRow[]>;
+        const arr = Array.isArray(json) ? json : Array.isArray((json as ApiResponseWrapper<TransactionRow[]>)?.data) ? (json as ApiResponseWrapper<TransactionRow[]>).data : [];
+        return Array.isArray(arr) ? arr : ([] as TransactionRow[]);
+    };
+
+    const computeBalanceFromTransactions = (tx: TransactionRow[]) => {
+        return tx.reduce((acc, curr) => {
+            const amount = Number(curr.amount) || 0;
+            if (curr.type === 0) return acc + amount;
+            if (curr.type === 1) return acc - amount;
+            return acc;
+        }, 0);
+    };
+
+    const computeSavings = async (budgetId: number, year: number, month: number) => {
+        setSavingsLoading(true);
+        try {
+            const monthsToSum = Array.from({ length: Math.max(0, month - 1) }, (_, i) => i + 1);
+            const results = await Promise.all(monthsToSum.map((m) => fetchStatsForMonth(budgetId, year, m)));
+
+            let sum = 0;
+            for (const tx of results) sum += computeBalanceFromTransactions(tx);
+
+            setSavings(sum);
+        } catch {
+            setSavings(0);
+        } finally {
+            setSavingsLoading(false);
         }
     };
 
@@ -91,6 +147,7 @@ export default function TransactionHistoryPage() {
     useEffect(() => {
         if (selectedBudgetId !== null) {
             refreshTransactions(selectedBudgetId, selectedYear, selectedMonth);
+            computeSavings(selectedBudgetId, selectedYear, selectedMonth);
         }
     }, [selectedBudgetId, selectedYear, selectedMonth]);
 
@@ -163,7 +220,7 @@ export default function TransactionHistoryPage() {
                 <div className={styles.statCard}>
                     <div className={styles.cardTitle}>Oszczędności</div>
                     <div className={styles.cardValueWrapper}>
-                        <span className={styles.cardValue}>{loading ? "--,--" : "0.00"}</span>
+                        <span className={styles.cardValue}>{savingsLoading ? "--,--" : savings.toFixed(2)}</span>
                         <span className={styles.cardCurrency}>{currencySymbol}</span>
                     </div>
                     <div className={styles.cardDescription}>(tyle udało Ci się zaoszczędzić z poprzednich miesięcy)</div>
@@ -240,17 +297,17 @@ export default function TransactionHistoryPage() {
                             </tr>
                         ) : (
                             rawData.map((t, idx) => (
-                                <tr key={(t as any).id ?? idx}>
-                                    <td>{(t as any).date ? new Date((t as any).date).toLocaleDateString("pl-PL") : "-"}</td>
-                                    <td>((t as any).type === 0 ? "PRZYCHÓD" : "WYDATEK")</td>
-                                    <td>{(t as any).categoryName ?? "-"}</td>
-                                    <td>{(t as any).title ?? "-"}</td>
-                                    <td>{mapPaymentMethodIdToName((t as any).paymentMethod)}</td>
-                                    <td style={{ color: (t as any).type === 1 ? "#FF6B6B" : "#8CC279", fontWeight: 700 }}>
-                                        {(t as any).type === 1 ? "-" : ""}
-                                        {Number((t as any).amount).toFixed(2)} {currencySymbol}
+                                <tr key={(t.id ?? idx).toString()}>
+                                    <td>{t.date ? new Date(t.date).toLocaleDateString("pl-PL") : "-"}</td>
+                                    <td>{t.type === 0 ? "PRZYCHÓD" : "WYDATEK"}</td>
+                                    <td>{t.categoryName ?? "-"}</td>
+                                    <td>{t.title ?? "-"}</td>
+                                    <td>{mapPaymentMethodIdToName(t.paymentMethod)}</td>
+                                    <td style={{ color: t.type === 1 ? "#FF6B6B" : "#8CC279", fontWeight: 700 }}>
+                                        {t.type === 1 ? "-" : ""}
+                                        {Number(t.amount).toFixed(2)} {currencySymbol}
                                     </td>
-                                    <td>{(t as any).userName ?? "-"}</td>
+                                    <td>{t.userName ?? "-"}</td>
                                     <td>
                                         <button className={styles.optionButton} type="button">
                                             Szczegóły
