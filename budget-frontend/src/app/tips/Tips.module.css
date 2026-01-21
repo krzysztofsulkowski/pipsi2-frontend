@@ -9,4 +9,196 @@
 
 .contentWrapper {
     width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 4px 44px;
+}
+
+.articleTop {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.lead {
+    font-family: var(--font-afacad);
+    font-size: 18px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.88);
+    margin: 0;
+}
+
+.quoteBox {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 10px 24px rgba(10, 12, 20, 0.35);
+    padding: 16px 18px;
+}
+
+.quoteText {
+    font-family: var(--font-afacad);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0;
+    text-align: center;
+}
+
+.gridWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 34px;
+}
+
+.cardsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    width: 100%;
+    max-width: 1000px;
+    justify-items: center;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+    min-height: 240px;
+    border-radius: 14px;
+    border: 2px solid #ffffff;
+    background: #f3f3f3;
+    box-shadow: 0 10px 24px rgba(10, 12, 20, 0.45);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+    .card:hover {
+        transform: translateY(-4px);
+    }
+
+.questionSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 76px;
+    padding: 12px 14px;
+    background-color: #272c3c;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.questionText {
+    color: #ffffff;
+    text-align: center;
+    font-family: var(--font-afacad);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.answerSection {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    padding: 16px 16px 18px;
+    background-color: #f3f3f3;
+}
+
+.answerText {
+    color: #272c3c;
+    text-align: center;
+    font-family: var(--font-afacad);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.45;
+    margin: 0;
+    width: 100%;
+}
+
+.articleBottom {
+    width: 100%;
+    max-width: 1000px;
+    margin: 30px auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.bottomTitle {
+    font-family: var(--font-afacad);
+    font-size: 26px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.callout {
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 10px 24px rgba(10, 12, 20, 0.35);
+    padding: 16px 18px;
+}
+
+.stepsList {
+    margin: 0;
+    padding-left: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: var(--font-afacad);
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.stepItem {
+    margin: 6px 0;
+}
+
+.noteBox {
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 14px 16px;
+}
+
+.noteText {
+    margin: 0;
+    font-family: var(--font-afacad);
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+@media (max-width: 1024px) {
+    .cardsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .cardsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .lead {
+        font-size: 16px;
+    }
+
+    .quoteText {
+        font-size: 16px;
+    }
+
+    .answerText {
+        font-size: 16px;
+    }
 }

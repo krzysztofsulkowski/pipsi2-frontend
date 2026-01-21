@@ -49,6 +49,7 @@ function DashboardPage() {
     const router = useRouter();
 
     const [authChecked, setAuthChecked] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
@@ -66,12 +67,19 @@ function DashboardPage() {
 
     const [selectedBudgetId, setSelectedBudgetId] = useState<number | null>(null);
 
+    const [savings, setSavings] = useState(0);
+    const [savingsLoading, setSavingsLoading] = useState(false);
+
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newBudgetName, setNewBudgetName] = useState("");
     const [createError, setCreateError] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
 
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+    const handleGoToSettings = () => {
+        setIsProfileMenuOpen(false);
+        router.push("/settings");
+    };
 
     const [isBudgetMenuOpen, setIsBudgetMenuOpen] = useState(false);
     const budgetMenuRef = useRef<HTMLDivElement | null>(null);
@@ -102,6 +110,14 @@ function DashboardPage() {
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
+    const isArchivedBudget = (b: any) => {
+        const v = b?.isArchived ?? b?.archived;
+        if (typeof v === "boolean") return v;
+
+        const s = typeof b?.status === "string" ? b.status.toLowerCase() : "";
+        return s.includes("arch");
+    };
+
     const refreshBudgetsList = async () => {
         setBudgetsLoading(true);
         try {
@@ -127,14 +143,18 @@ function DashboardPage() {
                 if (Array.isArray(data)) budgetsArray = data;
                 else if (data?.data && Array.isArray(data.data)) budgetsArray = data.data;
 
-                setBudgets(budgetsArray);
+                const activeBudgets = budgetsArray.filter(b => !isArchivedBudget(b));
 
-                if (budgetsArray.length > 0) {
-                    const currentIdValid = selectedBudgetId && budgetsArray.some(b => b.id === selectedBudgetId);
-                    if (!currentIdValid) setSelectedBudgetId(budgetsArray[0].id);
+                setBudgets(activeBudgets);
+
+                if (activeBudgets.length > 0) {
+                    const currentIdValid = selectedBudgetId && activeBudgets.some(b => b.id === selectedBudgetId);
+                    if (!currentIdValid) setSelectedBudgetId(activeBudgets[0].id);
                 } else {
+                    setSelectedBudgetId(null);
                     setLoading(false);
                 }
+
             } else {
                 setBudgets([]);
             }
@@ -176,6 +196,28 @@ function DashboardPage() {
     };
 
 
+    const fetchStatsForMonth = async (budgetId: number, year: number, month: number) => {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            router.replace("/landing-page");
+            return [] as Transaction[];
+        }
+
+        const url = `${apiUrl}/api/Reports/stats?year=${year}&month=${month}&budgetId=${budgetId}`;
+        const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+
+        if (res.status === 401) {
+            localStorage.removeItem("authToken");
+            router.replace("/landing-page");
+            return [] as Transaction[];
+        }
+
+        if (!res.ok) return [] as Transaction[];
+
+        const data = await res.json() as Transaction[];
+        return Array.isArray(data) ? data : ([] as Transaction[]);
+    };
+
     useEffect(() => {
         const fetchInitialData = async () => {
             const token = localStorage.getItem("authToken");
@@ -189,7 +231,7 @@ function DashboardPage() {
             const fetchUser = async () => {
                 try {
                     const res = await fetch(`${apiUrl}/api/authentication/me`, {
-                        headers: { "Authorization": `Bearer ${token}` }
+                        headers: { Authorization: `Bearer ${token}` }
                     });
                     if (res.ok) {
                         const data: UserResponse = await res.json();
@@ -200,10 +242,37 @@ function DashboardPage() {
                 }
             };
 
+            const checkAdmin = async () => {
+                try {
+                    const res = await fetch(`${apiUrl}/api/adminPanel/users/roles`, {
+                        method: "GET",
+                        headers: { Authorization: `Bearer ${token}` },
+                        cache: "no-store",
+                    });
+
+                    if (res.status === 401) {
+                        localStorage.removeItem("authToken");
+                        router.replace("/landing-page");
+                        return;
+                    }
+
+                    if (res.status === 403) {
+                        setIsAdmin(false);
+                        return;
+                    }
+
+                    setIsAdmin(res.ok);
+                } catch {
+                    setIsAdmin(false);
+                }
+            };
+
             await Promise.all([
                 fetchUser(),
+                checkAdmin(),
                 refreshBudgetsList()
             ]);
+
         };
 
         fetchInitialData();
@@ -211,8 +280,13 @@ function DashboardPage() {
 
     useEffect(() => {
         if (!selectedBudgetId) return;
+        if (!budgets.some(b => b.id === selectedBudgetId)) return;
+
         refreshStats(selectedBudgetId, selectedYear, selectedMonth);
-    }, [selectedYear, selectedMonth, selectedBudgetId]);
+        computeSavings(selectedBudgetId, selectedYear, selectedMonth);
+    }, [selectedYear, selectedMonth, selectedBudgetId, budgets]);
+
+
 
     useEffect(() => {
         const onMouseDown = (e: MouseEvent) => {
@@ -226,6 +300,16 @@ function DashboardPage() {
         document.addEventListener("mousedown", onMouseDown);
         return () => document.removeEventListener("mousedown", onMouseDown);
     }, [isBudgetMenuOpen]);
+
+    useEffect(() => {
+        if (!selectedBudgetId) return;
+        localStorage.setItem("selectedBudgetId", String(selectedBudgetId));
+
+        const b = budgets.find(x => x.id === selectedBudgetId);
+        const name = b?.name ?? "";
+        if (name) localStorage.setItem("selectedBudgetName", name);
+    }, [selectedBudgetId, budgets]);
+
 
     const { totalIncome, totalExpenses } = rawData.reduce(
         (acc, curr) => {
@@ -266,6 +350,44 @@ function DashboardPage() {
         const n = Number(amount);
         const val = Number.isFinite(n) ? Math.abs(n) : 0;
         return val.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    const computeBalanceFromTransactions = (tx: Transaction[]) => {
+        return tx.reduce((acc, curr) => {
+            const amount = Number(curr.amount) || 0;
+            if (curr.type === 0) return acc + amount;
+            if (curr.type === 1) return acc - amount;
+            return acc;
+        }, 0);
+    };
+
+    const computeSavings = async (budgetId: number, year: number, month: number) => {
+        setSavingsLoading(true);
+        try {
+            const years = [2024, 2025, 2026];
+
+            let sum = 0;
+
+            if (month === 0) {
+                const prevYears = years.filter(y => y < year);
+                for (const y of prevYears) {
+                    const monthPromises = Array.from({ length: 12 }, (_, i) => fetchStatsForMonth(budgetId, y, i + 1));
+                    const results = await Promise.all(monthPromises);
+                    for (const tx of results) sum += computeBalanceFromTransactions(tx);
+                }
+            } else {
+                const monthsToSum = Array.from({ length: Math.max(0, month - 1) }, (_, i) => i + 1);
+                const results = await Promise.all(monthsToSum.map(m => fetchStatsForMonth(budgetId, year, m)));
+                for (const tx of results) sum += computeBalanceFromTransactions(tx);
+            }
+
+            setSavings(sum);
+        } catch (e) {
+            console.error("Błąd liczenia oszczędności", e);
+            setSavings(0);
+        } finally {
+            setSavingsLoading(false);
+        }
     };
 
 
@@ -574,6 +696,7 @@ function DashboardPage() {
         } finally {
             setIsExpenseSaving(false);
         }
+
     };
 
     if (!authChecked) return null;
@@ -637,6 +760,14 @@ function DashboardPage() {
                 </div>
 
                 <nav className={styles.nav}>
+                    {isAdmin && (
+                        <Link
+                            href="/admin-panel"
+                            className={`${styles.navLink} ${styles.adminNavLink}`}
+                        >
+                            Admin panel
+                        </Link>
+                    )}
                     <Link href="/tips" className={styles.navLink}>
                         Porady finansowe
                     </Link>
@@ -668,7 +799,7 @@ function DashboardPage() {
                                 <button
                                     type="button"
                                     className={styles.profileDropdownItem}
-                                    onClick={() => setIsProfileMenuOpen(false)}
+                                    onClick={handleGoToSettings}
                                 >
                                     Ustawienia
                                 </button>
@@ -901,9 +1032,9 @@ function DashboardPage() {
                                         </p>
                                     </div>
                                 <div className={styles.cardValue}>
-                                    <span className={styles.cardValueNumber}>
-                                        {loading ? "--,--" : "0.00"}
-                                    </span>
+                                                    <span className={styles.cardValueNumber}>
+                                                        {savingsLoading ? "--,--" : savings.toFixed(2)}
+                                                    </span>
                                     <span className={styles.cardValueCurrency}>
                                         {currencySymbol}
                                     </span>

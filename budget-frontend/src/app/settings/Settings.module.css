@@ -1,0 +1,154 @@
+
+.contentWrapper {
+    width: 100%;
+    max-width: 1900px;
+    margin: 32px 0 0;
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: 120px;
+    align-items: center;
+}
+
+
+.textColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+
+.titleBlock {
+  width: 100%;
+}
+
+
+.title {
+  color: #FFF;
+  font-family: 'Afacad', sans-serif;
+  font-size: 48px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.1;
+}
+
+
+.divider {
+  width: 100%;
+  max-width: 689px;
+  height: 1px;
+  background: #FFF;
+  margin: 0;
+}
+
+
+.descriptions {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+
+.textRegular, .textHighlight {
+  font-family: 'Afacad', sans-serif;
+  font-size: 28px;
+  margin: 0;
+  word-wrap: break-word;
+}
+
+
+.textRegular {
+  color: #FFF;
+  font-weight: 300;
+}
+
+
+.textHighlight {
+  color: #EAC278;
+  font-weight: 300;
+}
+
+
+.imageColumn {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+
+
+.imageBox {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 1 / 1;
+    border-radius: 22px;
+    transform: translateX(20px);
+}
+
+
+
+
+@media (max-width: 1200px) {
+  .contentWrapper {
+    flex-direction: column;
+    gap: 60px;
+    padding: 40px;
+    text-align: center;
+    height: auto;
+    min-height: 100vh;
+  }
+
+
+  .textColumn {
+    align-items: center;
+    max-width: 800px;
+    flex: none;
+  }
+ 
+  .imageColumn {
+    flex: none;
+    width: 100%;
+  }
+
+
+  .imageBox {
+    max-width: 500px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .contentWrapper {
+    padding: 24px 24px;
+    gap: 10px;
+  }
+
+
+  .title {
+    font-size: 32px;
+  }
+  .textRegular, .textHighlight {
+    font-size: 18px;
+    line-height: 1.5;
+  }
+  .textColumn {
+    gap: 24px;
+    align-items: center;
+    text-align: center;
+  }
+
+
+  .imageColumn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+
+  .imageBox {
+    width: 100%;    
+    max-width: 500px;
+    aspect-ratio: 527 / 660;
+  }
+}
